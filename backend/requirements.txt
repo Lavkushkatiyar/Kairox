@@ -16,3 +16,18 @@ ruff==0.11.4
 
 # === Logging ===
 loguru==0.7.3
+
+# === Database ===
+sqlalchemy==2.0.44
+asyncpg==0.30.0
+
+# === Migrations ===
+alembic==1.14.2
+
+# === Auth ===
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+
+# === Email ===
+python-multipart==0.0.20
+
