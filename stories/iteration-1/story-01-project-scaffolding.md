@@ -1,13 +1,13 @@
 # Story 1: Project Scaffolding & Dev Environment
 
-| Field | Details |
-|-------|---------|
-| **Iteration** | 1 — Foundation |
-| **Story #** | 1 of 24 |
-| **Priority** | 🔴 Critical |
-| **Depends On** | None (starting point) |
-| **Blocks** | All other stories |
-| **Estimated Effort** | 1–2 days |
+| Field                | Details               |
+| -------------------- | --------------------- |
+| **Iteration**        | 1 — Foundation        |
+| **Story #**          | 1 of 24               |
+| **Priority**         | 🔴 Critical           |
+| **Depends On**       | None (starting point) |
+| **Blocks**           | All other stories     |
+| **Estimated Effort** | 1–2 days              |
 
 ---
 
@@ -34,8 +34,8 @@ This is the very first story. Nothing else can proceed until the project skeleto
 
 ### 1.1 — Initialize Python Project
 
-- [ ] Create `backend/` directory at project root
-- [ ] Create `pyproject.toml` (or `requirements.txt`) with initial dependencies:
+- [x] Create `backend/` directory at project root
+- [x] Create `pyproject.toml` (or `requirements.txt`) with initial dependencies:
   ```
   fastapi==0.110+
   uvicorn[standard]
@@ -45,8 +45,8 @@ This is the very first story. Nothing else can proceed until the project skeleto
   pydantic-settings
   python-dotenv
   ```
-- [ ] Create a Python virtual environment (`python -m venv venv`)
-- [ ] Install all dependencies
+- [x] Create a Python virtual environment (`python -m venv venv`)
+- [x] Install all dependencies
 
 ### 1.2 — Create Folder Structure
 
@@ -151,21 +151,24 @@ async def health_check():
 ### 1.5 — Database Setup
 
 - [ ] Create `db/base.py`:
+
   ```python
   from sqlalchemy.orm import DeclarativeBase
-  
+
   class Base(DeclarativeBase):
       pass
   ```
+
 - [ ] Create `db/session.py`:
+
   ```python
   from sqlalchemy import create_engine
   from sqlalchemy.orm import sessionmaker
   from app.config import settings
-  
+
   engine = create_engine(settings.DATABASE_URL)
   SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-  
+
   def get_db():
       db = SessionLocal()
       try:
@@ -173,6 +176,7 @@ async def health_check():
       finally:
           db.close()
   ```
+
 - [ ] Initialize Alembic: `alembic init app/db/migrations`
 - [ ] Configure `alembic.ini` and `env.py` to use `settings.DATABASE_URL`
 - [ ] Verify Alembic can connect and generate a blank migration
@@ -203,7 +207,7 @@ REFRESH_TOKEN_EXPIRE_DAYS=7
 
 ```yaml
 # docker-compose.dev.yml
-version: '3.8'
+version: "3.8"
 services:
   db:
     image: postgres:16
@@ -264,18 +268,18 @@ frontend/
 ### 1.10 — API Client Setup (`services/api.js`)
 
 ```javascript
-import axios from 'axios';
+import axios from "axios";
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8000',
+  baseURL: import.meta.env.VITE_API_URL || "http://localhost:8000",
   headers: {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
   },
 });
 
 // Request interceptor — attach auth token (for later)
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('access_token');
+  const token = localStorage.getItem("access_token");
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
@@ -287,11 +291,11 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      localStorage.removeItem('access_token');
-      window.location.href = '/login';
+      localStorage.removeItem("access_token");
+      window.location.href = "/login";
     }
     return Promise.reject(error);
-  }
+  },
 );
 
 export default api;
@@ -313,12 +317,12 @@ export default defineConfig({
   server: {
     port: 3000,
     proxy: {
-      '/api': {
-        target: 'http://localhost:8000',
+      "/api": {
+        target: "http://localhost:8000",
         changeOrigin: true,
       },
-      '/health': {
-        target: 'http://localhost:8000',
+      "/health": {
+        target: "http://localhost:8000",
         changeOrigin: true,
       },
     },
@@ -360,17 +364,17 @@ export default defineConfig({
 
 ## Files Created / Modified
 
-| File | Action | Description |
-|------|--------|-------------|
-| `backend/app/main.py` | NEW | FastAPI app entry point |
-| `backend/app/config.py` | NEW | Settings via pydantic-settings |
-| `backend/app/db/base.py` | NEW | SQLAlchemy Base class |
-| `backend/app/db/session.py` | NEW | DB session factory |
-| `backend/.env.example` | NEW | Environment template |
-| `frontend/src/services/api.js` | NEW | Axios client |
-| `frontend/src/pages/HealthCheckPage.jsx` | NEW | Health check UI |
-| `frontend/vite.config.js` | MODIFIED | Proxy configuration |
-| `docker-compose.dev.yml` | NEW | PostgreSQL container |
+| File                                     | Action   | Description                    |
+| ---------------------------------------- | -------- | ------------------------------ |
+| `backend/app/main.py`                    | NEW      | FastAPI app entry point        |
+| `backend/app/config.py`                  | NEW      | Settings via pydantic-settings |
+| `backend/app/db/base.py`                 | NEW      | SQLAlchemy Base class          |
+| `backend/app/db/session.py`              | NEW      | DB session factory             |
+| `backend/.env.example`                   | NEW      | Environment template           |
+| `frontend/src/services/api.js`           | NEW      | Axios client                   |
+| `frontend/src/pages/HealthCheckPage.jsx` | NEW      | Health check UI                |
+| `frontend/vite.config.js`                | MODIFIED | Proxy configuration            |
+| `docker-compose.dev.yml`                 | NEW      | PostgreSQL container           |
 
 ---
 
