@@ -1,1 +1,18 @@
-print("Hii")
+from fastapi import FastAPI, Depends
+from app.config import settings 
+from app.db.session import get_db
+from sqlalchemy.orm import Session
+
+app = FastAPI(title=settings.APP_NAME, description="AI Workflow Automation Assistant", version="0.1.0",)
+
+@app.get("/")
+def root():
+    return {"message": "Welcome to Kairox API"}
+
+@app.get("/db-test")
+def db_test(db: Session = Depends(get_db)):
+    return {"db": "connected"}
+
+@app.get("/health")
+async def health_check():
+    return {"status": "ok"}

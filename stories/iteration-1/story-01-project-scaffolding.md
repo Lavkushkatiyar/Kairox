@@ -230,9 +230,9 @@ volumes:
 
 ### 1.8 — Initialize React Project
 
-- [ ] Create `frontend/` directory at project root
-- [ ] Initialize Vite + React: `npx -y create-vite@latest ./ --template react`
-- [ ] Install dependencies:
+- [x] Create `frontend/` directory at project root
+- [x] Initialize Vite + React: `npx -y create-vite@latest ./ --template react`
+- [x] Install dependencies:
   ```
   npm install axios react-router-dom
   ```
