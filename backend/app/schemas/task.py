@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 from datetime import datetime
-from typing import Optional , List
+from typing import Optional 
 
 class TaskCreate(BaseModel):
     title:str
@@ -12,7 +12,6 @@ class TaskCreate(BaseModel):
 
     status:Optional[str]=None
     priority:Optional[str]=None
-    dependencies:Optional[list[int]]=[]
 
 class TaskResponse(BaseModel):
     id:int
