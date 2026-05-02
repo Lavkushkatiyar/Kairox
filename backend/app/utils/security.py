@@ -1,4 +1,3 @@
-import pwd
 from datetime import datetime,timedelta
 from passlib.context import CryptContext
 from app.config import settings

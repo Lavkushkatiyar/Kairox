@@ -1,8 +1,8 @@
-"""create tasks table
+"""init_base
 
-Revision ID: d3f1589242ca
+Revision ID: 3a9738d9ba7d
 Revises: 
-Create Date: 2026-04-20 02:29:37.503411
+Create Date: 2026-05-03 01:17:37.301338
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = 'd3f1589242ca'
+revision: str = '3a9738d9ba7d'
 down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
