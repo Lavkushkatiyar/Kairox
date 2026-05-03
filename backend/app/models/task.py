@@ -13,5 +13,6 @@ class Task(Base):
     status = Column(String(50), default="pending")
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
     def __repr__(self):
         return f"<Task id={self.id} title={self.title}>"
