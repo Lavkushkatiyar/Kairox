@@ -1,13 +1,15 @@
 # Story 2: User Data Model & Authentication (Basic)
 
-| Field | Details |
-|-------|---------|
-| **Iteration** | 1 — Foundation |
-| **Story #** | 2 of 24 |
-| **Priority** | 🔴 Critical |
-| **Depends On** | Story 1 (Scaffolding) |
-| **Blocks** | Stories 3, 4, 5, 6, 7 (all models need user scoping) |
-| **Estimated Effort** | 2–3 days |
+[done 20/05/2026 by lavkush]
+
+| Field                | Details                                              |
+| -------------------- | ---------------------------------------------------- |
+| **Iteration**        | 1 — Foundation                                       |
+| **Story #**          | 2 of 24                                              |
+| **Priority**         | 🔴 Critical                                          |
+| **Depends On**       | Story 1 (Scaffolding)                                |
+| **Blocks**           | Stories 3, 4, 5, 6, 7 (all models need user scoping) |
+| **Estimated Effort** | 2–3 days                                             |
 
 ---
 
@@ -66,6 +68,7 @@ class User(Base):
 ```
 
 **Key decisions:**
+
 - `UUID` primary key — globally unique, no sequential guessing
 - `email` indexed and unique — fast lookup for login
 - `timezone` stored for time resolution engine (Story 12)
@@ -315,11 +318,11 @@ npm install zustand
 ### 2.9 — Auth Service (`services/authService.js`)
 
 ```javascript
-import api from './api';
+import api from "./api";
 
 const authService = {
   register: async (email, password, fullName) => {
-    const response = await api.post('/api/v1/auth/register', {
+    const response = await api.post("/api/v1/auth/register", {
       email,
       password,
       full_name: fullName,
@@ -328,7 +331,7 @@ const authService = {
   },
 
   login: async (email, password) => {
-    const response = await api.post('/api/v1/auth/login', {
+    const response = await api.post("/api/v1/auth/login", {
       email,
       password,
     });
@@ -336,23 +339,23 @@ const authService = {
   },
 
   getMe: async () => {
-    const response = await api.get('/api/v1/auth/me');
+    const response = await api.get("/api/v1/auth/me");
     return response.data;
   },
 
   saveTokens: (tokens) => {
-    localStorage.setItem('access_token', tokens.access_token);
-    localStorage.setItem('refresh_token', tokens.refresh_token);
+    localStorage.setItem("access_token", tokens.access_token);
+    localStorage.setItem("refresh_token", tokens.refresh_token);
   },
 
   clearTokens: () => {
-    localStorage.removeItem('access_token');
-    localStorage.removeItem('refresh_token');
+    localStorage.removeItem("access_token");
+    localStorage.removeItem("refresh_token");
   },
 
-  getAccessToken: () => localStorage.getItem('access_token'),
+  getAccessToken: () => localStorage.getItem("access_token"),
 
-  isAuthenticated: () => !!localStorage.getItem('access_token'),
+  isAuthenticated: () => !!localStorage.getItem("access_token"),
 };
 
 export default authService;
@@ -361,8 +364,8 @@ export default authService;
 ### 2.10 — Auth Store (`store/authStore.js`)
 
 ```javascript
-import { create } from 'zustand';
-import authService from '../services/authService';
+import { create } from "zustand";
+import authService from "../services/authService";
 
 const useAuthStore = create((set) => ({
   user: null,
@@ -428,8 +431,8 @@ export default useAuthStore;
 ### 2.13 — Protected Route Component (`components/ProtectedRoute.jsx`)
 
 ```javascript
-import { Navigate } from 'react-router-dom';
-import useAuthStore from '../store/authStore';
+import { Navigate } from "react-router-dom";
+import useAuthStore from "../store/authStore";
 
 function ProtectedRoute({ children }) {
   const { isAuthenticated, isLoading } = useAuthStore();
@@ -443,11 +446,11 @@ function ProtectedRoute({ children }) {
 ### 2.14 — Router Setup (`App.jsx`)
 
 ```javascript
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import LoginPage from './pages/LoginPage';
-import RegisterPage from './pages/RegisterPage';
-import DashboardPage from './pages/DashboardPage';
-import ProtectedRoute from './components/ProtectedRoute';
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import LoginPage from "./pages/LoginPage";
+import RegisterPage from "./pages/RegisterPage";
+import DashboardPage from "./pages/DashboardPage";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
   return (
@@ -455,11 +458,14 @@ function App() {
       <Routes>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
-        <Route path="/" element={
-          <ProtectedRoute>
-            <DashboardPage />
-          </ProtectedRoute>
-        } />
+        <Route
+          path="/"
+          element={
+            <ProtectedRoute>
+              <DashboardPage />
+            </ProtectedRoute>
+          }
+        />
       </Routes>
     </BrowserRouter>
   );
@@ -480,6 +486,7 @@ alembic upgrade head
 ### 2.16 — Verify Table Structure
 
 After migration, verify the `users` table has:
+
 - `id` — UUID primary key
 - `email` — VARCHAR(255), unique, indexed
 - `hashed_password` — VARCHAR(255)
@@ -493,34 +500,34 @@ After migration, verify the `users` table has:
 
 ## Acceptance Criteria
 
-- [ ] `POST /api/v1/auth/register` creates a new user and returns JWT tokens
-- [ ] Duplicate email registration returns 400 error
-- [ ] `POST /api/v1/auth/login` returns JWT tokens for valid credentials
-- [ ] Invalid credentials return 401 error
-- [ ] `GET /api/v1/auth/me` returns user profile (protected endpoint)
-- [ ] Unauthenticated requests to `/me` return 401
-- [ ] Frontend login flow works: login → store token → redirect to dashboard
-- [ ] Frontend register flow works: register → store token → redirect
-- [ ] Page refresh maintains auth state (token persists in localStorage)
-- [ ] Logout clears tokens and redirects to login
+- [x] `POST /api/v1/auth/register` creates a new user and returns JWT tokens
+- [x] Duplicate email registration returns 400 error
+- [x] `POST /api/v1/auth/login` returns JWT tokens for valid credentials
+- [x] Invalid credentials return 401 error
+- [x] `GET /api/v1/auth/me` returns user profile (protected endpoint)
+- [x] Unauthenticated requests to `/me` return 401
+- [x] Frontend login flow works: login → store token → redirect to dashboard
+- [x] Frontend register flow works: register → store token → redirect
+- [x] Page refresh maintains auth state (token persists in localStorage)
+- [x] Logout clears tokens and redirects to login
 
 ---
 
 ## Files Created / Modified
 
-| File | Action | Description |
-|------|--------|-------------|
-| `backend/app/models/user.py` | NEW | User SQLAlchemy model |
-| `backend/app/schemas/user.py` | NEW | Pydantic schemas for auth |
-| `backend/app/utils/security.py` | NEW | Password hashing + JWT utils |
-| `backend/app/services/auth_service.py` | NEW | Auth business logic |
-| `backend/app/api/deps.py` | NEW | FastAPI dependencies (get_current_user) |
-| `backend/app/api/v1/auth.py` | NEW | Auth API endpoints |
-| `frontend/src/services/authService.js` | NEW | Auth API client |
-| `frontend/src/store/authStore.js` | NEW | Auth state management |
-| `frontend/src/pages/LoginPage.jsx` | NEW | Login page |
-| `frontend/src/pages/RegisterPage.jsx` | NEW | Register page |
-| `frontend/src/components/ProtectedRoute.jsx` | NEW | Route guard |
+| File                                         | Action | Description                             |
+| -------------------------------------------- | ------ | --------------------------------------- |
+| `backend/app/models/user.py`                 | NEW    | User SQLAlchemy model                   |
+| `backend/app/schemas/user.py`                | NEW    | Pydantic schemas for auth               |
+| `backend/app/utils/security.py`              | NEW    | Password hashing + JWT utils            |
+| `backend/app/services/auth_service.py`       | NEW    | Auth business logic                     |
+| `backend/app/api/deps.py`                    | NEW    | FastAPI dependencies (get_current_user) |
+| `backend/app/api/v1/auth.py`                 | NEW    | Auth API endpoints                      |
+| `frontend/src/services/authService.js`       | NEW    | Auth API client                         |
+| `frontend/src/store/authStore.js`            | NEW    | Auth state management                   |
+| `frontend/src/pages/LoginPage.jsx`           | NEW    | Login page                              |
+| `frontend/src/pages/RegisterPage.jsx`        | NEW    | Register page                           |
+| `frontend/src/components/ProtectedRoute.jsx` | NEW    | Route guard                             |
 
 ---
 
