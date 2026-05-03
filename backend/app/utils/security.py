@@ -13,6 +13,16 @@ def hash_password(password: str) -> str:
 def verify_password(password: str, hashed_password: str) -> bool:
     return pwd_context.verify(password, hashed_password)
 
+
+
+def create_access_token(payload: dict) -> str:
+    data = payload.copy()
+    expire = datetime.utcnow() + timedelta(
+        minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES
+    )
+    data.update({"exp": expire, "type": "access"})
+    return jwt.encode(data, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
+
 def create_refresh_token(payload: dict) -> str:
     data = payload.copy()
     expire = datetime.utcnow() + timedelta(
