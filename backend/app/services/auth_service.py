@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 
 from app.models.user import User
 
-from app.schemas.user import UserCreate, UserLogin, TokenResponse
+from app.schemas.user import UserCreate, UserLogin, TokenResponse,AccessTokenResponse
 
 from app.config import settings
 
@@ -92,4 +92,38 @@ class AuthService:
         if not user or not user.is_active:
             raise ValueError("User not found")
 
-        return user        
+        return user
+
+    @staticmethod
+    def refresh_access_token(db: Session, refresh_token: str):
+
+        payload = decode_token(refresh_token)
+
+        if not payload:
+            raise ValueError("Invalid token")
+
+        if payload.get("type") != "refresh":
+            raise ValueError("Invalid token type")
+
+        user_id = payload.get("user_id")
+
+        if not user_id:
+             raise ValueError("Invalid token payload")
+
+        user = db.query(User).filter(User.id == user_id).first()
+
+        if not user or not user.is_active:
+            raise ValueError("User not found")
+
+        new_payload = {
+            "user_id": str(user.id),
+            "email": user.email
+        }
+
+        access_token = create_access_token(new_payload)
+
+        return AccessTokenResponse(
+            access_token=access_token,
+            token_type="bearer",
+            expires_in=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60
+        )    
