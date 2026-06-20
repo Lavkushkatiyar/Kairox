@@ -15,6 +15,8 @@ def root():
 def db_test(db: Session = Depends(get_db)):
     return {"db": "connected"}
 
+print(settings.DATABASE_URL)
+
 @app.get("/health")
 async def health_check():
     return {"status": "ok"}
