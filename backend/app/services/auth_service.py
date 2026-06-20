@@ -19,6 +19,9 @@ from app.utils.security import (
 class AuthService:
     @staticmethod
     def register(db:Session, data:UserCreate):
+        print("Registering user")
+        print("data",data)
+        print("db",db)
         existing_user = db.query(User).filter(User.email == data.email).first()
         if existing_user:
             raise ValueError("User with this email already exists")

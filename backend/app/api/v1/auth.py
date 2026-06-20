@@ -13,6 +13,9 @@ router = APIRouter(prefix="/auth", tags=["Authentication"])
 
 @router.post("/register", response_model=TokenResponse, status_code=201)
 def register(data: UserCreate, db: Session = Depends(get_db)):
+    print("Registering user")
+    print("data",data)
+    print("db",db)
     try:
         return AuthService.register(db, data)
     except ValueError as e:
