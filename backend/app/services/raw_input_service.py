@@ -7,7 +7,6 @@ from app.schemas.raw_input import RawInputCreate
 
 
 class RawInputService:
-
     @staticmethod
     def create_input(db:Session, user_id:UUID,payload:RawInputCreate)-> RawInput:
         raw_input = RawInput(user_id =user_id,text = payload.text,source = payload.source)

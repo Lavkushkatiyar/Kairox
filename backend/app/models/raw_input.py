@@ -1,15 +1,6 @@
-import enum
-import uuid
-
+import enum,uuid
 from datetime import datetime
-
-from sqlalchemy import Column
-from sqlalchemy import DateTime
-from sqlalchemy import Enum
-from sqlalchemy import ForeignKey
-from sqlalchemy import String
-from sqlalchemy import Text
-
+from sqlalchemy import Column,DateTime,Enum,ForeignKey,String,Text
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 
@@ -21,7 +12,7 @@ class InputStatus(str,enum.Enum):
     COMPLETED = "completed"
     FAILED = "failed"
 
-class rawInput(Base):
+class RawInput(Base):
     __tablename__ = "raw_inputs"
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, nullable=False)
     user_id = Column(UUID(as_uuid=True),ForeignKey("users.id"), nullable=False,index=True)
@@ -31,7 +22,7 @@ class rawInput(Base):
     error_message = Column(Text, nullable=True)
     created_at = Column(DateTime,default = datetime.utcnow,nullable = False)
     processed_at = Column(DateTime,nullable=True)
-    user = relationship("users",backref="inputs")
+    user = relationship("User",backref="inputs")
  
 
     

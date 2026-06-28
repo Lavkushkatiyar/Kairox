@@ -6,7 +6,6 @@ from app.api.v1.router import router as api_router
 
 app = FastAPI(title=settings.APP_NAME, description="AI Workflow Automation Assistant", version="0.1.0",)
 
-
 @app.get("/")
 def root():
     return {"message": "Welcome to Kairox API"}
