@@ -43,11 +43,11 @@ class Task(Base):
     input_id = Column(
         UUID(as_uuid=True),
         ForeignKey("raw_inputs.id"),
-        nullable=False,
+        nullable=True,
         index=True
     )
 
-    title = Column(String(255), index=True)
+    title = Column(String(255), index=True,nullable=False)
     description = Column(Text, nullable=True)
     status = Column(
     Enum(TaskStatus),
@@ -72,7 +72,7 @@ class Task(Base):
     ai_generated = Column(Boolean, default=False)
     ai_confidence = Column(Float, nullable=True)
     created_at = Column(DateTime,default = datetime.utcnow,nullable = False)
-    updated_at = Column(DateTime,default = datetime.utcnow,nullable = False)
+    updated_at = Column(DateTime,default = datetime.utcnow,onupdate=datetime.utcnow,nullable = False)    
     user = relationship("User", backref="tasks")
     input = relationship("RawInput",back_populates="tasks")
     
