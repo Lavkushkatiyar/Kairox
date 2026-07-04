@@ -24,29 +24,29 @@ class TaskUpdate(BaseModel):
 
     status: Optional[TaskStatus] = None
     priority: Optional[TaskPriority] = None
-    sort_order:Optional = None
+    sort_order:Optional[int] = None
     task_type: Optional[TaskType] = None
 
 
 class TaskRead(BaseModel):
     id: UUID
     user_id: UUID
-    input_id: Optional[UUID]
+    input_id: Optional[UUID] = None
 
     title: str
-    description: Optional[str]
+    description: Optional[str] = None
 
     status: TaskStatus
     priority: TaskPriority
     task_type: TaskType
 
-    due_at: Optional[datetime]
-    completed_at: Optional[datetime]
+    due_at: Optional[datetime]=None
+    completed_at: Optional[datetime]=None
 
     sort_order: int
 
     ai_generated: bool
-    ai_confidence: Optional[float]
+    ai_confidence: Optional[float]=None
 
     created_at: datetime
     updated_at: datetime
@@ -56,10 +56,10 @@ class TaskRead(BaseModel):
 class TaskResponse(BaseModel):
     id: UUID
     title: str
-    description: Optional[str]
+    description: Optional[str] =None
 
-    due_time: Optional[datetime]
-    completed_at: Optional[datetime]
+    due_time: Optional[datetime]=None
+    completed_at: Optional[datetime]=None
 
     status: TaskStatus
     priority: TaskPriority
