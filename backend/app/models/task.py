@@ -2,7 +2,7 @@ import uuid,enum
 from datetime import datetime
 from sqlalchemy import  Boolean,Column,DateTime,Enum,Float,ForeignKey,Integer,String,Text
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship,backref
 
 from app.db.base import Base
 
@@ -75,6 +75,15 @@ class Task(Base):
     updated_at = Column(DateTime,default = datetime.utcnow,onupdate=datetime.utcnow,nullable = False)    
     user = relationship("User", backref="tasks")
     input = relationship("RawInput",back_populates="tasks")
+    dependencies = relationship(
+    "Task",
+    secondary="task_dependencies",
+    primaryjoin="Task.id == TaskDependency.task_id",
+    secondaryjoin="Task.id == TaskDependency.depends_on_id",
+    backref="dependents",
+    lazy="selectin",
+)
+    
     
     def __repr__(self):
         return f"<Task id={self.id} title={self.title}>"
