@@ -18,6 +18,9 @@ def create_task(task: TaskCreate, db: Session = Depends(get_db),current_user: Us
 def get_tasks(db: Session = Depends(get_db) ,current_user: User = Depends(get_current_user)):
     return TaskService.get_tasks(db=db,user_id=current_user.id)
 
+@router.get("/stats")
+def get_task_stats(db:Session = Depends(get_db),current_user:User = Depends(get_current_user)):
+    return TaskService.get_task_stats(db=db,user_id=current_user.id)
 
 @router.get("/{task_id}")
 def get_task(task_id: UUID,db: Session = Depends(get_db),current_user: User = Depends(get_current_user)):
@@ -26,3 +29,7 @@ def get_task(task_id: UUID,db: Session = Depends(get_db),current_user: User = De
 @router.patch("/{task_id}",response_model=TaskResponse)
 def updated_task(task_id: UUID, payload: TaskUpdate,db: Session = Depends(get_db),current_user: User = Depends(get_current_user)):
     return TaskService.updated_task(db=db,user_id=current_user.id,task_id=task_id,data=payload)
+
+@router.delete("/{task_id}")
+def delete_task(task_id: UUID,db: Session = Depends(get_db),current_user: User = Depends(get_current_user)):
+    return TaskService.delete_task(db=db,user_id=current_user.id,task_id=task_id)
