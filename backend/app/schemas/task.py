@@ -8,6 +8,7 @@ from typing import List
 class TaskCreate(BaseModel):
     """Create Task Schema"""
     title: str = Field(...,min_length=1,max_length=255)
+    input_id: Optional[UUID] = None
     description: Optional[str] = Field(None,max_length=1000)
 
     due_at: Optional[datetime] = None
