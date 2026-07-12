@@ -23,6 +23,10 @@ class RawInput(Base):
     created_at = Column(DateTime,default = datetime.utcnow,nullable = False)
     processed_at = Column(DateTime,nullable=True)
     user = relationship("User",backref="inputs")
- 
+    
+    tasks = relationship(
+        "Task",
+        back_populates="input",
+    ) 
 
     

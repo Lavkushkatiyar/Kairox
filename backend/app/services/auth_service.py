@@ -6,6 +6,9 @@ from app.schemas.user import UserCreate, UserLogin, TokenResponse,AccessTokenRes
 
 from app.config import settings
 
+from fastapi import Depends ,Header
+from app.db.session import get_db
+from fastapi.security import OAuth2PasswordBearer
 
 from app.utils.security import (
     hash_password,
@@ -81,7 +84,7 @@ class AuthService:
         )
 
     @staticmethod
-    def get_current_user(db: Session, token: str) -> User:
+    def get_current_user(db: Session=Depends(get_db),token: str=Depends(OAuth2PasswordBearer)) -> User:
 
         payload = decode_token(token)
         if not payload or payload.get("type") != "access":
