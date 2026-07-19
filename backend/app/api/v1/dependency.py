@@ -32,3 +32,7 @@ def get_dependency(
     db: Session = Depends(get_db),
 ):
     return DependencyServices.get_dependency(db=db,task_id=task_id)
+
+@router.delete("/", status_code=200)
+def delete_dependency(task_id:UUID,dependency_id:UUID,db:Session=Depends(get_db)):
+    return DependencyServices.remove_dependency(db=db,task_id=task_id,dependency_id=dependency_id)

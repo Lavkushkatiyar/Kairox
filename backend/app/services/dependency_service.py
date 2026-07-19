@@ -41,8 +41,25 @@ class DependencyServices:
         db.commit()
         db.refresh(dependency)
         return dependency
-
+    
+    
+    @staticmethod
     def get_dependency(db:Session,task_id:UUID):
         return db.query(TaskDependency).filter(TaskDependency.task_id == task_id).all()
-
+    
+    
+    @staticmethod
+    def remove_dependency(db:Session,task_id:UUID,dependency_id:UUID):
+        dependency = (
+            db.query(TaskDependency)
+            .filter(
+                TaskDependency.task_id == task_id,
+                TaskDependency.id == dependency_id)
+            .first()
+        )    
+        if not dependency:
+            raise HTTPException(status_code=204,detail='dependency not exist')
         
+        db.delete(dependency)
+        db.commit()
+        return dependency
