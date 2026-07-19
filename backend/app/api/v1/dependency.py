@@ -33,6 +33,17 @@ def get_dependency(
 ):
     return DependencyServices.get_dependency(db=db,task_id=task_id)
 
-@router.delete("/", status_code=200)
+@router.delete("/",response_model=DependencyRead, status_code=200)
 def delete_dependency(task_id:UUID,dependency_id:UUID,db:Session=Depends(get_db)):
     return DependencyServices.remove_dependency(db=db,task_id=task_id,dependency_id=dependency_id)
+
+@router.get("/chain",response_model=list[DependencyRead])
+def get_dependency_chain(
+    task_id: UUID,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    return DependencyService.get_dependency_chain(
+    db=db,
+    task_id=task_id,
+)

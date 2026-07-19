@@ -47,19 +47,27 @@ class DependencyServices:
     def get_dependency(db:Session,task_id:UUID):
         return db.query(TaskDependency).filter(TaskDependency.task_id == task_id).all()
     
+
+    @staticmethod
+    def _collect_dependencies(
+        db: Session,
+        current_task_id: UUID,
+        result: list,
+    ):
+        dependencies = (
+            db.query(TaskDependency)
+            .filter(TaskDependency.task_id == current_task_id)
+            .all()
+        )
+
+        for dependency in dependencies:
+            result.append(dependency)
+            _collect_dependencies(db,dependency.depends_on_id,result)
+            
     
     @staticmethod
-    def remove_dependency(db:Session,task_id:UUID,dependency_id:UUID):
-        dependency = (
-            db.query(TaskDependency)
-            .filter(
-                TaskDependency.task_id == task_id,
-                TaskDependency.id == dependency_id)
-            .first()
-        )    
-        if not dependency:
-            raise HTTPException(status_code=204,detail='dependency not exist')
+    def get_dependency_chain(db: Session,task_id: UUID):
+        result = []
+        DependencyServices._collect_dependencies(db,task_id,result)
         
-        db.delete(dependency)
-        db.commit()
-        return dependency
+        return result
