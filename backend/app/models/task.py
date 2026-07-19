@@ -75,10 +75,7 @@ class Task(Base):
     updated_at = Column(DateTime,default = datetime.utcnow,onupdate=datetime.utcnow,nullable = False)    
     user = relationship("User", backref="tasks")
     input = relationship("RawInput",back_populates="tasks")
-    dependencies = relationship(
-    "Task",
-    secondary="task_dependencies",
-    primaryjoin="Task.id == TaskDependency.task_id",
+    dependencies = relationship("Task",secondary="task_dependencies",primaryjoin="Task.id == TaskDependency.task_id",
     secondaryjoin="Task.id == TaskDependency.depends_on_id",
     backref="dependents",
     lazy="selectin",
