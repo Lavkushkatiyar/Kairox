@@ -8,7 +8,8 @@ from app.api.auth_dependencies import get_current_user
 from app.schemas.dependency import DependencyCreate, DependencyRead
 from app.services.dependency_service import DependencyServices
 from fastapi import HTTPException
-from app.models import TaskDependency
+from app.models import TaskDependency ,Task
+from app.schemas.task import TaskRead
 
 router =  APIRouter(prefix="/task/{task_id}/dependencies",tags = ["Dependencies"])
 
@@ -31,7 +32,7 @@ def get_dependency(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    return DependencyServices.get_dependency(db=db,task_id=task_id)
+    return DependencyServices.get_task_dependency(db=db,task_id=task_id)
 
 @router.delete("/",response_model=DependencyRead, status_code=200)
 def delete_dependency(task_id:UUID,dependency_id:UUID,db:Session=Depends(get_db)):
@@ -47,3 +48,11 @@ def get_dependency_chain(
     db=db,
     task_id=task_id,
 )
+
+@router.get("/dependents",response_model=list[TaskRead])
+def get_dependents(
+    task_id: UUID,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    return DependencyServices.get_dependents(db=db,task_id=task_id,user_id=current_user.id)

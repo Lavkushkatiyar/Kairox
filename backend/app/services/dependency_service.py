@@ -2,6 +2,7 @@ from sqlalchemy.orm import Session
 from uuid import UUID
 from app.models import Task , TaskDependency
 from fastapi import HTTPException
+from app.services.task_service import TaskService
 
 class DependencyServices:
     @staticmethod
@@ -44,8 +45,11 @@ class DependencyServices:
     
     
     @staticmethod
-    def get_dependency(db:Session,task_id:UUID):
-        return db.query(TaskDependency).filter(TaskDependency.task_id == task_id).all()
+    def get_task_dependency(db:Session,task_id:UUID):
+        task = db.query(TaskDependency).filter(TaskDependency.task_id == task_id).all()
+        if task is None:
+            raise HTTPException(status_code=404,detail="Task not found")
+        return task
     
 
     @staticmethod
@@ -66,8 +70,16 @@ class DependencyServices:
             
     
     @staticmethod
-    def get_dependency_chain(db: Session,task_id: UUID):
+    def get_task_dependency_chain(db: Session,task_id: UUID):
         result = []
         DependencyServices._collect_dependencies(db,task_id,result)
         
         return result
+    
+    @staticmethod
+    def get_dependents(db:Session,task_id:UUID,user_id:UUID):
+        task =  TaskService.get_task(db=db,user_id=user_id,task_id=task_id)
+        if task is None:
+            raise HTTPException(status_code=404,detail="Task not found")
+        return task.dependents
+
