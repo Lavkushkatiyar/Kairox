@@ -18,6 +18,14 @@ def create_reminder(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    return ReminderService.create_reminder(db,current_user.id,task_id,data,data)
+    return ReminderService.create_reminder(db,current_user.id,task_id,data)
+
+@router.get("/",response_model=List[ReminderRead])
+def get_reminder(
+    task_id: UUID,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    return ReminderService.get_reminder(db,current_user.id,task_id)
 
     

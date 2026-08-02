@@ -28,9 +28,14 @@ class ReminderService:
             reminder_type = data.reminder_type,
             message = data.message
         )
-            
+
         db.add(reminder)
         db.commit()
         db.refresh(reminder)
         return reminder
 
+    @staticmethod
+    def get_reminder(db:Session,user_id:UUID,task_id:UUID)->List[ReminderRead]:
+        task = TaskService.get_task(db,user_id,task_id)
+        reminders = db.query(Reminder).filter(Reminder.task_id == task_id,Reminder.user_id == user_id).all()
+        return reminders

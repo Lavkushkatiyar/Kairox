@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime,timezone
 from typing import Optional
 from uuid import UUID
 
@@ -8,7 +8,8 @@ from app.models.reminder import ReminderStatus, ReminderType
 
 
 def validate_future_datetime(value: datetime | None) -> datetime | None:
-    if value is not None and value <= datetime.utcnow():
+    print(value)
+    if value is not None and value <= datetime.now(timezone.utc):
         raise ValueError("Reminder time must be in the future")
     return value
 
