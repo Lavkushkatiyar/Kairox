@@ -39,3 +39,20 @@ class ReminderService:
         task = TaskService.get_task(db,user_id,task_id)
         reminders = db.query(Reminder).filter(Reminder.task_id == task_id,Reminder.user_id == user_id).all()
         return reminders
+    
+    @staticmethod
+    def update_reminder(db:Session,user_id:UUID,reminder_id:UUID,data:ReminderUpdate)->Reminder:
+        reminder = ReminderService._get_reminder_of_a_task(db,user_id,reminder_id)
+        reminder.remind_at = data.remind_at
+        reminder.reminder_type = data.reminder_type
+        reminder.message = data.message
+        reminder.status = data.status
+        db.commit()
+        db.refresh(reminder)
+        return reminder
+
+    def delete_reminder(db:Session,user_id:UUID,reminder_id:UUID)->Reminder:
+        reminder = ReminderService._get_reminder_of_a_task(db,user_id,reminder_id)
+        db.delete(reminder)
+        db.commit()
+        return reminder
