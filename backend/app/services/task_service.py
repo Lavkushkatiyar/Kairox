@@ -1,9 +1,10 @@
 from datetime import datetime
 from fastapi import HTTPException
 from uuid import UUID
-from app.schemas.task import TaskCreate
+from app.schemas.task import TaskCreate,TaskUpdate,Task,TaskStatus,TaskPriority
 from sqlalchemy.orm import Session
-from app.models.task import Task
+
+
 class TaskService:
     @staticmethod
     def create_task(db:Session,user_id:UUID,data:TaskCreate) -> Task:
@@ -58,6 +59,7 @@ class TaskService:
         db.delete(task)
         db.commit()
         return task
+    
     def get_task_stats(db:Session,user_id:UUID):
         tasks = TaskService.get_tasks(db,user_id)
         total = len(tasks)
@@ -99,4 +101,3 @@ class TaskService:
             overdue=overdue,
         )
 
-        

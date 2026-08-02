@@ -38,15 +38,16 @@ def get_dependency(
 def delete_dependency(task_id:UUID,dependency_id:UUID,db:Session=Depends(get_db)):
     return DependencyServices.remove_dependency(db=db,task_id=task_id,dependency_id=dependency_id)
 
-@router.get("/chain",response_model=list[DependencyRead])
+@router.get("/chain")
 def get_dependency_chain(
     task_id: UUID,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    return DependencyService.get_dependency_chain(
+    return DependencyServices.get_task_dependency_chain(
     db=db,
     task_id=task_id,
+    user_id=current_user.id
 )
 
 @router.get("/dependents",response_model=list[TaskRead])
