@@ -8,7 +8,6 @@ from app.models.reminder import ReminderStatus, ReminderType
 
 
 def validate_future_datetime(value: datetime | None) -> datetime | None:
-    print(value)
     if value is not None and value <= datetime.now(timezone.utc):
         raise ValueError("Reminder time must be in the future")
     return value
