@@ -35,10 +35,20 @@ class ReminderService:
         return reminder
 
     @staticmethod
-    def get_reminder(db:Session,user_id:UUID,task_id:UUID)->List[ReminderRead]:
-        task = TaskService.get_task(db,user_id,task_id)
-        reminders = db.query(Reminder).filter(Reminder.task_id == task_id,Reminder.user_id == user_id).all()
-        return reminders
+    def get_reminders(
+        db: Session,
+        user_id: UUID,
+        upcoming_only: bool = False,
+        task_id: UUID = None
+    )->List[ReminderRead]:
+        reminders = db.query(Reminder).filter(Reminder.user_id == user_id)
+
+        if task_id:
+            reminders = reminders.filter(Reminder.task_id == task_id)
+
+        if upcoming_only:
+            reminders = reminders.filter(Reminder.status == ReminderStatus.PENDING,Reminder.remind_at > datetime.utcnow()).all()
+        return reminders.order_by(Reminder.remind_at.asc()).all()
     
     @staticmethod
     def update_reminder(db:Session,user_id:UUID,reminder_id:UUID,data:ReminderUpdate)->Reminder:
