@@ -80,6 +80,7 @@ class Task(Base):
     backref="dependents",
     lazy="selectin",
 )
+    reminders = relationship("Reminder",back_populates="task",cascade="all, delete-orphan",lazy="selectin")
     
     
     def __repr__(self):
