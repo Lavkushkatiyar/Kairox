@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { Mail, Lock, Eye, EyeOff, AlertCircle } from 'lucide-react';
-import apiClient from '../api/client';
+import { useAuth } from '../context/AuthContext';
 
 const Login = ({ onSwitchToRegister }) => {
+  const { login } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -15,16 +16,7 @@ const Login = ({ onSwitchToRegister }) => {
     setError('');
     setLoading(true);
     try {
-      const response = await apiClient.post('/auth/login', {
-        email,
-        password,
-      });
-      const { access_token, refresh_token } = response.data;
-      localStorage.setItem('kairox_access_token', access_token);
-      if (refresh_token) {
-        localStorage.setItem('kairox_refresh_token', refresh_token);
-      }
-      alert('Signed in successfully!');
+      await login(email, password);
     } catch (err) {
       setError(err.response?.data?.detail || 'Invalid email or password.');
     } finally {

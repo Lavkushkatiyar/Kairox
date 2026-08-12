@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { User, Mail, Lock, Eye, EyeOff, AlertCircle, CheckCircle2 } from 'lucide-react';
-import apiClient from '../api/client';
+import { useAuth } from '../context/AuthContext';
 
 const Register = ({ onSwitchToLogin }) => {
+  const { register } = useAuth();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -26,15 +27,8 @@ const Register = ({ onSwitchToLogin }) => {
 
     setLoading(true);
     try {
-      await apiClient.post('/auth/register', {
-        name,
-        email,
-        password,
-      });
-      setSuccess('Account created successfully! Redirecting to login...');
-      setTimeout(() => {
-        if (onSwitchToLogin) onSwitchToLogin();
-      }, 1500);
+      await register(name, email, password);
+      setSuccess('Account created successfully!');
     } catch (err) {
       setError(err.response?.data?.detail || 'Failed to create account. Please try again.');
     } finally {

@@ -12,7 +12,7 @@ const apiClient = axios.create({
 // Request Interceptor: Attach JWT Access Token
 apiClient.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('kairox_access_token');
+    const token = localStorage.getItem('access_token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -26,8 +26,8 @@ apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response && error.response.status === 401) {
-      localStorage.removeItem('kairox_access_token');
-      localStorage.removeItem('kairox_refresh_token');
+      localStorage.removeItem('access_token');
+      localStorage.removeItem('refresh_token');
       if (window.location.pathname !== '/login' && window.location.pathname !== '/register') {
         window.location.href = '/login';
       }
