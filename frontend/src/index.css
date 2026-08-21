@@ -1,22 +1,26 @@
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 :root {
-  --bg-color: #eef2f7;
-  --card-bg: #eef2f7;
+  --bg-color: #f4f7fc;
+  --card-bg: #f4f7fc;
 
   /* Neumorphic Shadows */
-  --shadow-extruded: 12px 12px 24px #c8d0e0, -12px -12px 24px #ffffff;
-  --shadow-extruded-sm: 6px 6px 14px #c8d0e0, -6px -6px 14px #ffffff;
-  --shadow-extruded-hover: 8px 8px 18px #c8d0e0, -8px -8px 18px #ffffff;
+  --shadow-extruded: 8px 8px 18px #d1d9e6, -8px -8px 18px #ffffff;
+  --shadow-extruded-sm: 5px 5px 12px #d1d9e6, -5px -5px 12px #ffffff;
+  --shadow-extruded-hover: 10px 10px 22px #c2cbdc, -10px -10px 22px #ffffff;
 
-  --shadow-inset: inset 4px 4px 8px #c8d0e0, inset -4px -4px 8px #ffffff;
-  --shadow-inset-focused: inset 5px 5px 10px #bec7d8, inset -5px -5px 10px #ffffff;
-  --shadow-pressed: inset 4px 4px 8px #c8d0e0, inset -4px -4px 8px #ffffff;
+  --shadow-inset: inset 5px 5px 12px #d1d9e6, inset -5px -5px 12px #ffffff;
+  --shadow-inset-focused: inset 6px 6px 14px #c2cbdc, inset -6px -6px 14px #ffffff;
+  --shadow-pressed: inset 4px 4px 8px #d1d9e6, inset -4px -4px 8px #ffffff;
 
   /* Accent & Typography */
   --primary-blue: #0284c7;
   --primary-blue-hover: #0369a1;
-  --text-dark: #1e293b;
+  --text-dark: #0f172a;
   --text-muted: #64748b;
   --text-placeholder: #94a3b8;
   --danger-color: #ef4444;
@@ -25,253 +29,378 @@
   --font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-dark);
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  #root {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--bg-color);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 3px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #0284c7;
+  }
 }
 
-body {
-  font-family: var(--font-family);
-  background-color: var(--bg-color);
-  color: var(--text-dark);
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 16px;
-  -webkit-font-smoothing: antialiased;
-}
+@layer components {
+  /* Neumorphic Extruded Card */
+  .neu-card-extruded {
+    background: var(--card-bg);
+    border-radius: 24px;
+    box-shadow: var(--shadow-extruded);
+    transition: all 0.3s ease;
+  }
 
-/* Main Container */
-.auth-wrapper {
-  width: 100%;
-  max-width: 420px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
+  /* Neumorphic Inset Input Container */
+  .neu-input-inset {
+    background: var(--bg-color);
+    border-radius: 24px;
+    box-shadow: var(--shadow-inset);
+    transition: all 0.2s ease;
+  }
 
-/* Header Branding */
-.brand-header {
-  text-align: center;
-  margin-bottom: 20px;
-}
+  .neu-input-inset:focus-within {
+    box-shadow: var(--shadow-inset-focused);
+  }
 
-.brand-title {
-  font-size: 2rem;
-  font-weight: 800;
-  color: var(--primary-blue);
-  letter-spacing: -0.5px;
-}
+  /* Neumorphic Pill Button */
+  .neu-pill-btn {
+    background: var(--bg-color);
+    box-shadow: var(--shadow-extruded-sm);
+    border: none;
+    border-radius: 20px;
+    padding: 10px 20px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--primary-blue);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
 
-.brand-subtitle {
-  font-size: 0.9rem;
-  color: var(--text-muted);
-  font-weight: 500;
-  margin-top: 2px;
-}
+  .neu-pill-btn:hover:not(:disabled) {
+    box-shadow: var(--shadow-extruded-hover);
+    color: var(--primary-blue-hover);
+    transform: translateY(-1px);
+  }
 
-/* Neumorphic Card */
-.neu-card {
-  width: 110%;
-  background: var(--card-bg);
-  border-radius: 26px;
-  box-shadow: var(--shadow-extruded);
-  padding: 30px 28px;
-  transition: all 0.3s ease;
-}
+  .neu-pill-btn:active:not(:disabled) {
+    box-shadow: var(--shadow-pressed);
+    transform: translateY(1px);
+  }
 
-.card-title {
-  text-align: center;
-  font-size: 1.4rem;
-  font-weight: 700;
-  color: var(--text-dark);
-  margin-bottom: 20px;
-}
+  .neu-pill-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
 
-/* Form Controls */
-.form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-  margin-bottom: 14px;
-}
+  /* Secondary Neu Pill Button */
+  .neu-pill-btn-secondary {
+    background: var(--bg-color);
+    box-shadow: var(--shadow-extruded-sm);
+    border: none;
+    border-radius: 20px;
+    padding: 8px 18px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    text-transform: uppercase;
+  }
 
-.form-label-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
+  .neu-pill-btn-secondary:hover:not(:disabled) {
+    box-shadow: var(--shadow-extruded-hover);
+    color: var(--primary-blue);
+  }
 
-.form-label {
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: var(--text-muted);
-}
+  /* Neumorphic Floating Bar (Sidebar / Topbar) */
+  .neu-floating-bar {
+    background: var(--bg-color);
+    box-shadow: 6px 6px 16px #d1d9e6, -6px -6px 16px #ffffff;
+    border-radius: 20px;
+  }
 
-.forgot-link {
-  font-size: 0.78rem;
-  font-weight: 600;
-  color: var(--primary-blue);
-  text-decoration: none;
-}
+  /* Neumorphic Active Nav Icon */
+  .neu-icon-active {
+    background: var(--bg-color);
+    box-shadow: var(--shadow-inset);
+    color: var(--primary-blue);
+    border-radius: 14px;
+  }
 
-.forgot-link:hover {
-  text-decoration: underline;
-}
+  .neu-icon-idle {
+    color: #94a3b8;
+    transition: all 0.2s ease;
+  }
 
-/* Inset Input Wrapper */
-.neu-input-wrapper {
-  background: var(--bg-color);
-  box-shadow: var(--shadow-inset);
-  border-radius: 14px;
-  padding: 10px 14px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  transition: all 0.2s ease;
-}
+  .neu-icon-idle:hover {
+    color: var(--primary-blue);
+  }
 
-.neu-input-wrapper:focus-within {
-  box-shadow: var(--shadow-inset-focused);
-}
+  /* Custom Neumorphic Component Styles */
+  .auth-wrapper {
+    width: 100%;
+    max-width: 380px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 20px 16px;
+  }
 
-.input-icon {
-  color: var(--text-placeholder);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
+  .brand-header {
+    text-align: center;
+    margin-bottom: 16px;
+  }
 
-.neu-input-wrapper:focus-within .input-icon {
-  color: var(--primary-blue);
-}
+  .brand-title {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: var(--primary-blue);
+    letter-spacing: -0.5px;
+  }
 
-.neu-input {
-  width: 100%;
-  border: none;
-  outline: none;
-  background: transparent;
-  font-size: 0.9rem;
-  font-family: inherit;
-  color: var(--text-dark);
-  font-weight: 500;
-}
+  .brand-subtitle {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    font-weight: 500;
+    margin-top: 2px;
+  }
 
-.neu-input::placeholder {
-  color: var(--text-placeholder);
-  font-weight: 400;
-}
+  .neu-card {
+    width: 100%;
+    max-width: 380px;
+    background: var(--card-bg);
+    border-radius: 22px;
+    box-shadow: var(--shadow-extruded);
+    padding: 24px 22px;
+    transition: all 0.3s ease;
+  }
 
-.icon-btn {
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: var(--text-placeholder);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 2px;
-  border-radius: 6px;
-  transition: color 0.2s ease;
-}
+  .card-title {
+    text-align: center;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-dark);
+    margin-bottom: 16px;
+  }
 
-.icon-btn:hover {
-  color: var(--primary-blue);
-}
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    margin-bottom: 14px;
+  }
 
-/* Neumorphic Button */
-.neu-button {
-  width: 100%;
-  background: var(--bg-color);
-  box-shadow: var(--shadow-extruded-sm);
-  border: none;
-  border-radius: 30px;
-  padding: 12px;
-  font-size: 0.95rem;
-  font-weight: 700;
-  color: var(--primary-blue);
-  cursor: pointer;
-  transition: all 0.2s ease;
-  margin-top: 6px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-}
+  .form-label-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
 
-.neu-button:hover:not(:disabled) {
-  box-shadow: var(--shadow-extruded-hover);
-  color: var(--primary-blue-hover);
-}
+  .form-label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-muted);
+  }
 
-.neu-button:active:not(:disabled) {
-  box-shadow: var(--shadow-pressed);
-  transform: translateY(1px);
-}
+  .forgot-link {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--primary-blue);
+    text-decoration: none;
+  }
 
-.neu-button:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
+  .forgot-link:hover {
+    text-decoration: underline;
+  }
 
-/* Alert Notification */
-.alert-banner {
-  padding: 10px 14px;
-  border-radius: 12px;
-  font-size: 0.82rem;
-  font-weight: 500;
-  margin-bottom: 16px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  background: var(--bg-color);
-  box-shadow: var(--shadow-inset);
-}
+  .neu-input-wrapper {
+    background: var(--bg-color);
+    box-shadow: var(--shadow-inset);
+    border-radius: 14px;
+    padding: 10px 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: all 0.2s ease;
+  }
 
-.alert-danger {
-  color: var(--danger-color);
-}
+  .neu-input-wrapper:focus-within {
+    box-shadow: var(--shadow-inset-focused);
+  }
 
-.alert-success {
-  color: var(--success-color);
-}
+  .input-icon {
+    color: var(--text-placeholder);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
 
-/* Footer Link */
-.auth-footer {
-  margin-top: 20px;
-  text-align: center;
-  font-size: 0.85rem;
-  color: var(--text-muted);
-  font-weight: 500;
-}
+  .neu-input-wrapper:focus-within .input-icon {
+    color: var(--primary-blue);
+  }
 
-.auth-footer-link {
-  color: var(--primary-blue);
-  font-weight: 700;
-  text-decoration: none;
-  cursor: pointer;
-  margin-left: 4px;
-}
+  .neu-input {
+    width: 100%;
+    border: none;
+    outline: none;
+    background: transparent;
+    font-size: 0.9rem;
+    font-family: inherit;
+    color: var(--text-dark);
+    font-weight: 500;
+  }
 
-.auth-footer-link:hover {
-  text-decoration: underline;
-}
+  .neu-input::placeholder {
+    color: var(--text-placeholder);
+    font-weight: 400;
+  }
 
-/* Spinner */
-.spinner-sm {
-  width: 18px;
-  height: 18px;
-  border: 2px solid rgba(2, 132, 199, 0.2);
-  border-top-color: var(--primary-blue);
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-}
+  .icon-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--text-placeholder);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2px;
+    border-radius: 6px;
+    transition: color 0.2s ease;
+  }
 
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
+  .icon-btn:hover {
+    color: var(--primary-blue);
+  }
+
+  .neu-button {
+    width: 100%;
+    background: var(--bg-color);
+    box-shadow: var(--shadow-extruded-sm);
+    border: none;
+    border-radius: 30px;
+    padding: 12px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--primary-blue);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-top: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .neu-button:hover:not(:disabled) {
+    box-shadow: var(--shadow-extruded-hover);
+    color: var(--primary-blue-hover);
+  }
+
+  .neu-button:active:not(:disabled) {
+    box-shadow: var(--shadow-pressed);
+    transform: translateY(1px);
+  }
+
+  .neu-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  .alert-banner {
+    padding: 10px 14px;
+    border-radius: 12px;
+    font-size: 0.82rem;
+    font-weight: 500;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--bg-color);
+    box-shadow: var(--shadow-inset);
+  }
+
+  .alert-danger {
+    color: var(--danger-color);
+  }
+
+  .alert-success {
+    color: var(--success-color);
+  }
+
+  .auth-footer {
+    margin-top: 20px;
+    text-align: center;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    font-weight: 500;
+  }
+
+  .auth-footer-link {
+    color: var(--primary-blue);
+    font-weight: 700;
+    text-decoration: none;
+    cursor: pointer;
+    margin-left: 4px;
+  }
+
+  .auth-footer-link:hover {
+    text-decoration: underline;
+  }
+
+  .spinner-sm {
+    width: 18px;
+    height: 18px;
+    border: 2px solid rgba(2, 132, 199, 0.2);
+    border-top-color: var(--primary-blue);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
   }
 }
