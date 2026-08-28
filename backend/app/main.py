@@ -11,7 +11,7 @@ from app.cache.redis_client import init_redis, close_redis,get_redis
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
+async def lifespan():
     await init_redis()
 
     yield

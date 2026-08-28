@@ -12,10 +12,7 @@ class Settings(BaseSettings):
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
 
     REDIS_URL: str = "redis://localhost:6379/0"
-    REDIS_MAX_CONNECTIONS: int = 10
-    REDIS_SOCKET_TIMEOUT: int = 5
-    REDIS_SOCKET_CONNECT_TIMEOUT: int = 5
-
+  
     class Config:
         env_file = ".env"
         case_sensitive = True
