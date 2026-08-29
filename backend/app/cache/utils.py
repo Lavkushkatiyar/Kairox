@@ -18,3 +18,12 @@ async def set_cache(key: str, value,ttl:int = None):
 async def delete_cache(key:str):
     redis = await get_redis()
     await redis.delete(key)
+
+async def delete_cache_pattern(pattern:str):
+    redis  = await get_redis()
+    keys = []
+    async for key in redis.scan_iter(match = pattern):
+        keys.append(key)
+    if keys:
+        await redis.delete(*keys)
+    

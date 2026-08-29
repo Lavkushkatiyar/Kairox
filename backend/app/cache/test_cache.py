@@ -1,7 +1,7 @@
 import pytest
 import asyncio
 from app.cache.redis_client import init_redis, close_redis,get_redis
-from app.cache.utils import set_cache, get_cache, delete_cache
+from app.cache.utils import set_cache, get_cache, delete_cache , delete_cache_pattern
 
 @pytest.mark.asyncio 
 async def test_set_and_get_cache():
@@ -32,4 +32,21 @@ async def test_ttl_cache():
     await asyncio.sleep(2)
     result = await get_cache(key)
     assert result is None
+    await close_redis()
+
+@pytest.mark.asyncio
+async def test_delete_cache_pattern():
+    await init_redis()
+    key1 = "testkey1"
+    key2 = "testkey2"
+    await set_cache(key1, "value1", 60)
+    await set_cache(key2, "value2", 60)
+    await set_cache("user:1", {"id": 1}, 60)
+
+    await delete_cache_pattern("testkey*")
+    result1 = await get_cache(key1)
+    result2 = await get_cache(key2)
+    assert result1 is None
+    assert result2 is None
+    assert await get_cache("user:1") == {"id": 1}
     await close_redis()
