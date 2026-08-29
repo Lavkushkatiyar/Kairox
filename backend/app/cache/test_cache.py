@@ -50,3 +50,20 @@ async def test_delete_cache_pattern():
     assert result2 is None
     assert await get_cache("user:1") == {"id": 1}
     await close_redis()
+
+@pytest.mark.asyncio
+async def test_concurrent_cache_operations():
+    await init_redis()
+    operations = []
+    for i in range(10):
+        operations.append(set_cache(f"testkey{i}", f"value{i}", 60))
+    await asyncio.gather(*operations)
+    
+    operations_get = []
+    for i in range(10):
+        operations_get.append(get_cache(f"testkey{i}"))
+    results = await asyncio.gather(*operations_get)
+    
+    expected = [f"value{i}" for i in range(10)]
+    assert results == expected
+    await close_redis()

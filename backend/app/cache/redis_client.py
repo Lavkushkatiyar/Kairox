@@ -1,4 +1,3 @@
-from enum import global_enum
 import redis.asyncio as redis
 from app.config import settings
 
