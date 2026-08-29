@@ -13,3 +13,13 @@ async def test_set_and_get_cache():
     result = await get_cache(key)
     assert result == value
     await close_redis()
+    
+@pytest.mark.asyncio    
+async def test_delete_cache():
+    await init_redis()
+    key = "testkey"
+    await set_cache(key, "value", 60)
+    await delete_cache(key)
+    result = await get_cache(key)
+    assert result is None
+    await close_redis()
