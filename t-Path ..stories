@@ -1,0 +1,32 @@
+[33mtag v0.1.0[m
+
+Kairox initial production release
+[33me7db973[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mproduction[m[33m, [m[1;33mtag: [m[1;33mv0.1.0[m[33m, [m[1;31morigin/production[m[33m)[m chore: prepare production release
+ .gitignore                                         |   2 [32m+[m
+ backend/.gitignore                                 |   2 [32m+[m
+ .../iteration-1/story-01-project-scaffolding.md    | 386 [31m-----------[m
+ stories/iteration-1/story-02-user-auth.md          | 540 [31m----------------[m
+ stories/iteration-1/story-03-raw-input.md          | 492 [31m--------------[m
+ stories/iteration-1/story-04-task-crud.md          | 716 [31m---------------------[m
+ stories/iteration-1/story-05-dependencies.md       | 573 [31m-----------------[m
+ stories/iteration-1/story-06-reminders.md          | 539 [31m----------------[m
+ stories/iteration-1/story-07-drafts.md             | 507 [31m---------------[m
+ stories/iteration-2/story-08-redis-setup.md        | 217 [31m-------[m
+ stories/iteration-2/story-09-celery-setup.md       | 292 [31m---------[m
+ stories/iteration-2/story-10-ai-service.md         | 317 [31m---------[m
+ .../iteration-2/story-11-processing-pipeline.md    | 428 [31m------------[m
+ stories/iteration-2/story-12-time-resolver.md      | 267 [31m--------[m
+ stories/iteration-2/story-13-dependency-engine.md  | 326 [31m----------[m
+ stories/iteration-3/story-14-reminder-worker.md    | 146 [31m-----[m
+ stories/iteration-3/story-15-draft-pipeline.md     | 144 [31m-----[m
+ stories/iteration-3/story-16-redis-caching.md      |  84 [31m---[m
+ stories/iteration-3/story-17-websocket.md          | 162 [31m-----[m
+ stories/iteration-3/story-18-progress-tracking.md  | 110 [31m----[m
+ stories/iteration-3/story-19-error-handling.md     | 190 [31m------[m
+ stories/iteration-4/story-20-timeline-view.md      | 144 [31m-----[m
+ stories/iteration-4/story-21-structure-view.md     | 129 [31m----[m
+ stories/iteration-4/story-22-dashboard.md          | 142 [31m----[m
+ stories/iteration-4/story-23-testing.md            |  86 [31m---[m
+ stories/iteration-4/story-24-deployment.md         | 136 [31m----[m
+ stories/iteration-5-advanced.md                    |  55 [31m--[m
+ 27 files changed, 4 insertions(+), 7128 deletions(-)
