@@ -1,11 +1,31 @@
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
-from app.config import settings 
-from app.db.session import get_db
 from sqlalchemy.orm import Session
-from app.api.v1.router import router as api_router
 
-app = FastAPI(title=settings.APP_NAME, description="AI Workflow Automation Assistant", version="0.1.0",)
+from app.config import settings
+from app.db.session import get_db
+from app.api.v1.router import router as api_router
+from app.cache.redis_client import init_redis, close_redis,get_redis
+
+
+@asynccontextmanager
+async def lifespan(app:FastAPI):
+    await init_redis()
+
+    yield
+
+    await close_redis()
+
+
+app = FastAPI(
+    title=settings.APP_NAME,
+    description="AI Workflow Automation Assistant",
+    version="0.1.0",
+    lifespan=lifespan,
+)
+
 
 app.add_middleware(
     CORSMiddleware,
@@ -15,18 +35,37 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 @app.get("/")
 def root():
     return {"message": "Welcome to Kairox API"}
+
 
 @app.get("/db-test")
 def db_test(db: Session = Depends(get_db)):
     return {"db": "connected"}
 
+
 print(settings.DATABASE_URL)
+
 
 @app.get("/health")
 async def health_check():
-    return {"status": "ok"}
+    redis_ok = False
+
+    try:
+        redis_client = await get_redis()
+        await redis_client.ping()
+        redis_ok = True
+    except Exception:
+        pass
+
+    return {
+        "status": "ok" if redis_ok else "degraded",
+        "services": {
+            "api": True,
+            "redis": redis_ok,
+        },
+    }
 
 app.include_router(api_router, prefix="/api/v1")
