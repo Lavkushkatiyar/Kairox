@@ -9,3 +9,8 @@ def test_task(self, message: str):
         "message": f"Received from celery : {message}",
     }
     
+@celery_app.task(bind = True , base = KarioxTask,max_retries=3)
+def test_failing_task(self,should_fail : bool = True):
+    if should_fail and self.request.retries ==0:
+        self.retry(exc=Exception("Task failed")  , countdown=5)
+    return  {"status": "ok" , "retries" : self.request.retries}
