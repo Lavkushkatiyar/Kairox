@@ -1,10 +1,10 @@
 from app.workers.celery_app import celery_app
-import time
+from app.workers.base_task import KarioxTask
 
-@celery_app.task
-def test_task(message: str):
-    time.sleep(10)
+@celery_app.task(bind = True , base = KarioxTask)
+def test_task(self, message: str):
+    db = self.db
     return {
         "status": "ok",
-        "message": f"Received from celery : {message}"
+        "message": f"Received from celery : {message}",
     }
