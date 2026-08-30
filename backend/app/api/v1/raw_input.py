@@ -8,10 +8,7 @@ from app.models.user import User
 from app.schemas.raw_input import RawInputCreate,RawInputResponse
 from app.services.raw_input_service import RawInputService
 
-
-print("Raw Input Router Loaded")
 router = APIRouter(prefix="/inputs",tags=["Raw Inputs"])
-
 
 @router.post("",response_model= RawInputResponse,status_code=201)
 def create_input(payload: RawInputCreate,db: Session = Depends(get_db),current_user: User = Depends(get_current_user)):

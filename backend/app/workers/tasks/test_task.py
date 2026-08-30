@@ -8,3 +8,4 @@ def test_task(self, message: str):
         "status": "ok",
         "message": f"Received from celery : {message}",
     }
+    
