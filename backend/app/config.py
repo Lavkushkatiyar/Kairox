@@ -12,7 +12,7 @@ class Settings(BaseSettings):
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
 
     REDIS_URL: str = "redis://localhost:6379/0"
-  
+    AI_CLIENT_OPEN_KEY: str = ""
     class Config:
         env_file = ".env"
         case_sensitive = True
