@@ -13,8 +13,8 @@ class AIServices:
         API_KEY,
     ):
         self.API_URL = API_URL
-        self.API_KEY =API_KEY
-        self.provider =provider
+        self.API_KEY = API_KEY
+        self.provider = provider
         self.model = model
 
     def generate_response(self, message):
@@ -36,7 +36,7 @@ class AIServices:
             "stream": False,
             "think": False,
             "keep_alive": "30m",
-            "format":AI_TASK_FORMAT.model_json_schema(),
+            "format": AI_TASK_FORMAT.model_json_schema(),
             "options": {
                 "temperature": 0,
                 "num_ctx": 8192,
@@ -64,16 +64,16 @@ class AIServices:
         result: dict,
         provider: str,
     ) -> dict | None:
-        print(result)        
-    
+        print(result)
+
         if provider == "ollama":
             print(result)
-            output =  result.get("message", {}).get("content")
+            output = result.get("message", {}).get("content")
             return AI_TASK_FORMAT.model_validate_json(output).model_dump()
 
         choices = result.get("choices", [])
-        output =  choices[0].get("message", {}).get("content") if choices else None
-        output= AI_TASK_FORMAT.model_validate(output)
+        output = choices[0].get("message", {}).get("content") if choices else None
+        output = AI_TASK_FORMAT.model_validate(output)
         return output.model_dump()
 
     @staticmethod

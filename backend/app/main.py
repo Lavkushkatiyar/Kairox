@@ -1,12 +1,12 @@
 from contextlib import asynccontextmanager
 
+from app.api.v1.router import router as api_router
+from app.cache.redis_client import close_redis, get_redis, init_redis
+from app.db.session import get_db
 from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 
-from app.api.v1.router import router as api_router
-from app.cache.redis_client import close_redis, get_redis, init_redis
-from app.db.session import get_db
 from backend.app.core.config import settings
 
 

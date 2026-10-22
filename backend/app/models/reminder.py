@@ -2,6 +2,7 @@ import enum
 import uuid
 from datetime import datetime
 
+from app.db.base import Base
 from sqlalchemy import (
     Column,
     DateTime,
@@ -11,8 +12,6 @@ from sqlalchemy import (
 )
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
-
-from app.db.base import Base
 
 
 class ReminderType(str, enum.Enum):
