@@ -1,7 +1,7 @@
-from typing import Optional
+from enum import Enum
 
 from pydantic import BaseModel
-from enum import Enum
+
 
 class TaskType(str, Enum):
     TODO = "todo"
@@ -9,16 +9,18 @@ class TaskType(str, Enum):
     APPOINTMENT = "appointment"
     REMINDER = "reminder"
 
+
 class TaskPriority(str, Enum):
     HIGH = "high"
     MEDIUM = "medium"
     LOW = "low"
 
+
 class ExtractedTask(BaseModel):
     title: str
     type: TaskType
     priority: TaskPriority
-    due_expression: Optional[str] = None
+    due_expression: str | None = None
 
 
 class ParsedOutput(BaseModel):

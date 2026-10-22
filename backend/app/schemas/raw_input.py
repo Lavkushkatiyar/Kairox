@@ -1,5 +1,4 @@
 from datetime import datetime
-from typing import Optional
 from uuid import UUID
 
 from pydantic import BaseModel
@@ -7,7 +6,7 @@ from pydantic import BaseModel
 
 class RawInputCreate(BaseModel):
     text: str
-    source: Optional[str] = "manual"
+    source: str | None = "manual"
 
 
 class RawInputResponse(BaseModel):
@@ -15,9 +14,9 @@ class RawInputResponse(BaseModel):
     text: str
     status: str
     source: str
-    error_message: Optional[str] = None
+    error_message: str | None = None
     created_at: datetime
-    processed_at: Optional[datetime] = None
+    processed_at: datetime | None = None
 
     class Config:
         from_attributes = True
@@ -25,4 +24,4 @@ class RawInputResponse(BaseModel):
 
 class RawInputStatusUpdate(BaseModel):
     status: str
-    error_message: Optional[str] = None
+    error_message: str | None = None

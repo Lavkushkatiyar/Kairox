@@ -1,9 +1,12 @@
 import uuid
 from datetime import datetime
-from sqlalchemy import Column, String, Boolean, DateTime
+
+from sqlalchemy import Boolean, Column, DateTime, String
 from sqlalchemy.dialects.postgresql import UUID
-from app.db.base import Base
 from sqlalchemy.orm import relationship
+
+from app.db.base import Base
+
 
 class User(Base):
     __tablename__ = "users"
@@ -24,7 +27,9 @@ class User(Base):
 
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
-    reminders = relationship("Reminder", back_populates="user", cascade="all, delete-orphan", lazy="selectin")
+    reminders = relationship(
+        "Reminder", back_populates="user", cascade="all, delete-orphan", lazy="selectin"
+    )
 
     def __repr__(self):
         return f"<User id={self.id} email={self.email}>"

@@ -1,66 +1,70 @@
-from pydantic import BaseModel,Field
 from datetime import datetime
-from typing import Optional 
-from app.models.task import Task,TaskPriority,TaskStatus,TaskType
-from uuid import uuid4,UUID
-from typing import List
+from uuid import UUID
+
+from app.models.task import TaskPriority, TaskStatus, TaskType
+from pydantic import BaseModel, Field
+
 
 class TaskCreate(BaseModel):
     """Create Task Schema"""
-    title: str = Field(...,min_length=1,max_length=255)
-    input_id: Optional[UUID] = None
-    description: Optional[str] = Field(None,max_length=1000)
 
-    due_at: Optional[datetime] = None
+    title: str = Field(..., min_length=1, max_length=255)
+    input_id: UUID | None = None
+    description: str | None = Field(None, max_length=1000)
+
+    due_at: datetime | None = None
 
     status: TaskStatus = TaskStatus.TODO
     priority: TaskPriority = TaskPriority.MEDIUM
     task_type: TaskType = TaskType.ACTION
 
+
 class TaskUpdate(BaseModel):
-    title: Optional[str] = Field(None,min_length=1,max_length=255)
-    description: Optional[str] = None
+    title: str | None = Field(None, min_length=1, max_length=255)
+    description: str | None = None
 
-    due_at: Optional[datetime] = None
+    due_at: datetime | None = None
 
-    status: Optional[TaskStatus] = None
-    priority: Optional[TaskPriority] = None
-    sort_order:Optional[int] = None
-    task_type: Optional[TaskType] = None
+    status: TaskStatus | None = None
+    priority: TaskPriority | None = None
+    sort_order: int | None = None
+    task_type: TaskType | None = None
 
 
 class TaskRead(BaseModel):
     id: UUID
     user_id: UUID
-    input_id: Optional[UUID] = None
+    input_id: UUID | None = None
 
     title: str
-    description: Optional[str] = None
+    description: str | None = None
 
     status: TaskStatus
     priority: TaskPriority
     task_type: TaskType
 
-    due_at: Optional[datetime]=None
-    completed_at: Optional[datetime]=None
+    due_at: datetime | None = None
+    completed_at: datetime | None = None
 
     sort_order: int
 
     ai_generated: bool
-    ai_confidence: Optional[float]=None
+    ai_confidence: float | None = None
 
     created_at: datetime
     updated_at: datetime
 
     class Config:
         from_attributes = True
+
+
 class TaskResponse(BaseModel):
     id: UUID
     title: str
-    description: Optional[str] =None
+    description: str | None = None
 
-    due_time: Optional[datetime]=None
-    completed_at: Optional[datetime]=None
+    due_time: datetime | None = None
+    completed_at: datetime | None = None
 
     status: TaskStatus
     priority: TaskPriority
@@ -68,8 +72,10 @@ class TaskResponse(BaseModel):
 
     created_at: datetime
     updated_at: datetime
+
     class Config:
         from_attributes = True
+
 
 class TaskStats(BaseModel):
     total: int
@@ -77,8 +83,9 @@ class TaskStats(BaseModel):
     by_priority: dict[str, int]
     overdue: int
 
+
 class TaskList(BaseModel):
-    items: List[TaskRead]
+    items: list[TaskRead]
     total: int
     page: int
     page_size: int
