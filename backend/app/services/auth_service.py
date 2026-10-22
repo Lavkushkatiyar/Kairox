@@ -1,54 +1,47 @@
-from sqlalchemy.orm import Session
-
-from app.models.user import User
-
-from app.schemas.user import UserCreate, UserLogin, TokenResponse,AccessTokenResponse
-
-from app.config import settings
-
-from fastapi import Depends ,Header
 from app.db.session import get_db
-from fastapi.security import OAuth2PasswordBearer
-
+from app.models.user import User
+from app.schemas.user import AccessTokenResponse, TokenResponse, UserCreate, UserLogin
 from app.utils.security import (
+    create_access_token,
+    create_refresh_token,
+    decode_token,
     hash_password,
     verify_password,
-    create_refresh_token,
-    create_access_token,
-    decode_token
 )
+from fastapi import Depends
+from fastapi.security import OAuth2PasswordBearer
+from sqlalchemy.orm import Session
+
+from backend.app.core.config import settings
 
 
 class AuthService:
     @staticmethod
-    def register(db:Session, data:UserCreate):
+    def register(db: Session, data: UserCreate):
         print("Registering user")
-        print("data",data)
-        print("db",db)
+        print("data", data)
+        print("db", db)
         existing_user = db.query(User).filter(User.email == data.email).first()
         if existing_user:
             raise ValueError("User with this email already exists")
-        
+
         hashed_password = hash_password(data.password)
-        print("existing_user",existing_user)
-        print("hashed_password",hashed_password)
-        print("data",data)
+        print("existing_user", existing_user)
+        print("hashed_password", hashed_password)
+        print("data", data)
 
         user = User(
             email=data.email,
             hashed_password=hashed_password,
             full_name=data.full_name,
-           timezone="UTC",
-            is_active=True
+            timezone="UTC",
+            is_active=True,
         )
         print("till here ")
         db.add(user)
         db.commit()
         db.refresh(user)
-        payload = {
-            "user_id": str(user.id),
-            "email": user.email
-        }
+        payload = {"user_id": str(user.id), "email": user.email}
 
         access_token = create_access_token(payload)
         refresh_token = create_refresh_token(payload)
@@ -56,23 +49,19 @@ class AuthService:
         return TokenResponse(
             access_token=access_token,
             refresh_token=refresh_token,
-            expires_in=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60
+            expires_in=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
         )
-       
 
     @staticmethod
-    def login(db:Session, data:UserLogin):
+    def login(db: Session, data: UserLogin):
         user = db.query(User).filter(User.email == data.email).first()
         if not user:
             raise ValueError("User with this email not found")
-        
+
         if not verify_password(data.password, user.hashed_password):
             raise ValueError("Invalid password")
-        
-        payload = {
-            "user_id": str(user.id),
-            "email": user.email
-        }
+
+        payload = {"user_id": str(user.id), "email": user.email}
 
         access_token = create_access_token(payload)
         refresh_token = create_refresh_token(payload)
@@ -80,11 +69,13 @@ class AuthService:
         return TokenResponse(
             access_token=access_token,
             refresh_token=refresh_token,
-            expires_in=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60
+            expires_in=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
         )
 
     @staticmethod
-    def get_current_user(db: Session=Depends(get_db),token: str=Depends(OAuth2PasswordBearer)) -> User:
+    def get_current_user(
+        db: Session = Depends(get_db), token: str = Depends(OAuth2PasswordBearer)
+    ) -> User:
 
         payload = decode_token(token)
         if not payload or payload.get("type") != "access":
@@ -113,22 +104,19 @@ class AuthService:
         user_id = payload.get("user_id")
 
         if not user_id:
-             raise ValueError("Invalid token payload")
+            raise ValueError("Invalid token payload")
 
         user = db.query(User).filter(User.id == user_id).first()
 
         if not user or not user.is_active:
             raise ValueError("User not found")
 
-        new_payload = {
-            "user_id": str(user.id),
-            "email": user.email
-        }
+        new_payload = {"user_id": str(user.id), "email": user.email}
 
         access_token = create_access_token(new_payload)
 
         return AccessTokenResponse(
             access_token=access_token,
             token_type="bearer",
-            expires_in=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60
-        )    
+            expires_in=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
+        )

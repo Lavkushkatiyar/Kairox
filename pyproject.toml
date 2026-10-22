@@ -1,0 +1,23 @@
+[project]
+name = "kairox"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "Your GitHub Name", email = "lkatiyar12@gmail.com" }
+]
+requires-python = ">=3.14"
+dependencies = [
+    "celery>=5.6.3",
+    "psycopg>=3.3.6",
+    "pydantic[email]>=2.14.1",
+    "redis>=8.1.0",
+    "requests>=2.34.2",
+]
+
+[project.scripts]
+kairox = "kairox:main"
+
+[build-system]
+requires = ["uv_build>=0.12.19,<0.13.0"]
+build-backend = "uv_build"

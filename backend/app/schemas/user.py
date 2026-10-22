@@ -1,7 +1,7 @@
-from pydantic import BaseModel, EmailStr
-from uuid import UUID
 from datetime import datetime
+from uuid import UUID
 
+from pydantic import BaseModel, EmailStr
 
 
 class UserCreate(BaseModel):
@@ -9,9 +9,11 @@ class UserCreate(BaseModel):
     password: str
     full_name: str
 
+
 class UserLogin(BaseModel):
     email: EmailStr
     password: str
+
 
 class UserRead(BaseModel):
     id: UUID
@@ -30,6 +32,7 @@ class TokenResponse(BaseModel):
     refresh_token: str
     token_type: str = "bearer"
     expires_in: int
+
 
 class AccessTokenResponse(BaseModel):
     access_token: str

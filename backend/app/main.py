@@ -1,17 +1,17 @@
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, Depends
+from app.api.v1.router import router as api_router
+from app.cache.redis_client import close_redis, get_redis, init_redis
+from app.db.session import get_db
+from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 
-from app.config import settings
-from app.db.session import get_db
-from app.api.v1.router import router as api_router
-from app.cache.redis_client import init_redis, close_redis,get_redis
+from backend.app.core.config import settings
 
 
 @asynccontextmanager
-async def lifespan(app:FastAPI):
+async def lifespan(app: FastAPI):
     await init_redis()
 
     yield
@@ -67,5 +67,6 @@ async def health_check():
             "redis": redis_ok,
         },
     }
+
 
 app.include_router(api_router, prefix="/api/v1")

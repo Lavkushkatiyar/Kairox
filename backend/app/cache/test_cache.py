@@ -1,9 +1,11 @@
-import pytest
 import asyncio
-from app.cache.redis_client import init_redis, close_redis,get_redis
-from app.cache.utils import set_cache, get_cache, delete_cache , delete_cache_pattern
 
-@pytest.mark.asyncio 
+import pytest
+from app.cache.redis_client import close_redis, init_redis
+from app.cache.utils import delete_cache, delete_cache_pattern, get_cache, set_cache
+
+
+@pytest.mark.asyncio
 async def test_set_and_get_cache():
     await init_redis()
     key = "testkey"
@@ -13,8 +15,9 @@ async def test_set_and_get_cache():
     result = await get_cache(key)
     assert result == value
     await close_redis()
-    
-@pytest.mark.asyncio    
+
+
+@pytest.mark.asyncio
 async def test_delete_cache():
     await init_redis()
     key = "testkey"
@@ -23,7 +26,8 @@ async def test_delete_cache():
     result = await get_cache(key)
     assert result is None
     await close_redis()
-    
+
+
 @pytest.mark.asyncio
 async def test_ttl_cache():
     await init_redis()
@@ -33,6 +37,7 @@ async def test_ttl_cache():
     result = await get_cache(key)
     assert result is None
     await close_redis()
+
 
 @pytest.mark.asyncio
 async def test_delete_cache_pattern():
@@ -51,6 +56,7 @@ async def test_delete_cache_pattern():
     assert await get_cache("user:1") == {"id": 1}
     await close_redis()
 
+
 @pytest.mark.asyncio
 async def test_concurrent_cache_operations():
     await init_redis()
@@ -58,12 +64,12 @@ async def test_concurrent_cache_operations():
     for i in range(10):
         operations.append(set_cache(f"testkey{i}", f"value{i}", 60))
     await asyncio.gather(*operations)
-    
+
     operations_get = []
     for i in range(10):
         operations_get.append(get_cache(f"testkey{i}"))
     results = await asyncio.gather(*operations_get)
-    
+
     expected = [f"value{i}" for i in range(10)]
     assert results == expected
     await close_redis()
