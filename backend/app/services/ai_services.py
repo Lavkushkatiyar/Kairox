@@ -1,22 +1,27 @@
 import requests
+from app.schemas.ai_response import AI_TASK_FORMAT
 
-OLLAMA_URL = "http://localhost:11434/api/chat"
 REQUEST_TIME_OUT = 600
 
 
 class AIServices:
     def __init__(
         self,
+        provider,
         model,
+        API_URL,
+        API_KEY,
     ):
+        self.API_URL = API_URL
+        self.API_KEY =API_KEY
+        self.provider =provider
         self.model = model
 
     def generate_response(self, message):
-        model = self.model
         payload = self._build_payload(message)
 
-        response = self._post_request(OLLAMA_URL, payload)
-        content = self._extract_content(response, "ollama")
+        response = self._post_request(self.API_URL, payload)
+        content = self._extract_content(response, self.provider)
         self._print_ollama_metrics(response)
 
         return content
@@ -31,6 +36,7 @@ class AIServices:
             "stream": False,
             "think": False,
             "keep_alive": "30m",
+            "format":AI_TASK_FORMAT.model_json_schema(),
             "options": {
                 "temperature": 0,
                 "num_ctx": 8192,
@@ -38,7 +44,6 @@ class AIServices:
         }
 
     def _post_request(self, url: str, payload) -> dict:
-        print("its running with ", payload)
 
         response = requests.post(
             url,
@@ -58,12 +63,18 @@ class AIServices:
     def _extract_content(
         result: dict,
         provider: str,
-    ) -> str | None:
+    ) -> dict | None:
+        print(result)        
+    
         if provider == "ollama":
-            return result.get("message", {}).get("content")
+            print(result)
+            output =  result.get("message", {}).get("content")
+            return AI_TASK_FORMAT.model_validate_json(output).model_dump()
 
         choices = result.get("choices", [])
-        return choices[0].get("message", {}).get("content") if choices else None
+        output =  choices[0].get("message", {}).get("content") if choices else None
+        output= AI_TASK_FORMAT.model_validate(output)
+        return output.model_dump()
 
     @staticmethod
     def _print_ollama_metrics(result: dict) -> None:

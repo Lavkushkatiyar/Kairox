@@ -23,5 +23,5 @@ class ExtractedTask(BaseModel):
     due_expression: str | None = None
 
 
-class ParsedOutput(BaseModel):
+class AI_TASK_FORMAT(BaseModel):
     tasks: list[ExtractedTask]

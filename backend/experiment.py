@@ -1,7 +1,11 @@
 from app.core.config import settings
 from app.services.ai_services import AIServices
+from app.schemas.ai_response import AI_TASK_FORMAT
+from llm.llm_factory import get_llm
 
-ollamaAI = AIServices(model=settings.MODEL)
+OLLAMA_URL = "http://localhost:11434/api/chat"
+
+ollamaAI = get_llm(provider="ollama",model=settings.MODEL,API_URL=OLLAMA_URL,API_KEY=" ")
 
 
 SYSTEM_PROMPT = """
@@ -28,4 +32,5 @@ message = [
 ]
 
 output = ollamaAI.generate_response(message)
+
 print(output)
