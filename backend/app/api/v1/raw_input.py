@@ -9,7 +9,7 @@ from app.models.user import User
 from app.schemas.raw_input import RawInputCreate, RawInputResponse
 from app.services.raw_input_service import RawInputService
 from app.workers.tasks.process_input import process_rawInput
-from fastapi import APIRouter, Depends,HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 router = APIRouter(prefix="/inputs", tags=["Raw Inputs"])
