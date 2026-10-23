@@ -1,13 +1,3 @@
-from app.core.config import settings
-from llm.llm_factory import get_llm
-
-OLLAMA_URL = "http://localhost:11434/api/chat"
-
-ollamaAI = get_llm(
-    provider="ollama", model=settings.MODEL, API_URL=OLLAMA_URL, API_KEY=" "
-)
-
-
 SYSTEM_PROMPT = """
 You are Kairox's task interpretation assistant.
 Extract actionable work from the user’s text and classify it into structured tasks.
@@ -23,14 +13,15 @@ RULES:
 """
 
 
-message = [
-    {"role": "system", "content": SYSTEM_PROMPT},
-    {
-        "role": "user",
-        "content": "I have a meeting with Aman tomorrow at 11. Before that, finish the report.",
-    },
-]
+def get_prompted_message(user_message):
 
-output = ollamaAI.generate_response(message)
+    return [
+        {"role": "system", "content": SYSTEM_PROMPT},
+        {
+            "role": "user",
+            "content": user_message,
+        },
+    ]
 
-print(output)
+
+print(get_prompted_message("Hi i love you "))

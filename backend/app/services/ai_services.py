@@ -1,5 +1,7 @@
 import requests
+
 from app.schemas.ai_response import AI_TASK_FORMAT
+from llm.get_prompt_message import get_prompted_message
 
 REQUEST_TIME_OUT = 600
 
@@ -30,9 +32,10 @@ class AIServices:
         self,
         message,
     ) -> dict:
+        payload_message = get_prompted_message(message)
         return {
             "model": self.model,
-            "messages": message,
+            "messages": payload_message,
             "stream": False,
             "think": False,
             "keep_alive": "30m",
@@ -44,7 +47,8 @@ class AIServices:
         }
 
     def _post_request(self, url: str, payload) -> dict:
-
+        print("sending request")
+        print(payload, url, "real data ")
         response = requests.post(
             url,
             json=payload,

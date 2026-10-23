@@ -1,6 +1,6 @@
 import redis.asyncio as redis
 
-from backend.app.core.config import settings
+from app.core.config import settings
 
 async_redis = None
 

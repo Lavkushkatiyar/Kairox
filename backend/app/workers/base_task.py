@@ -1,12 +1,13 @@
 import logging
 
-from app.db.session import SessionLocal
 from celery import Task
+
+from app.db.session import SessionLocal
 
 logger = logging.getLogger(__name__)
 
 
-class KarioxTask(Task):
+class CeleryTaskBase(Task):
     """Base task for the Kairox"""
 
     _db = None

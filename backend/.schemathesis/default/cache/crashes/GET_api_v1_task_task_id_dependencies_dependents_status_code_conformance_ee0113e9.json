@@ -1,0 +1,93 @@
+{
+  "operation": "GET /api/v1/task/{task_id}/dependencies/dependents",
+  "method": "GET",
+  "path_template": "/api/v1/task/{task_id}/dependencies/dependents",
+  "fingerprint": "ee0113e9",
+  "case_id": "sGGU56",
+  "code_sample": "curl -X GET http://127.0.0.1:8000/api/v1/task/e3e70682-c209-1cac-a29f-6fbed82c07cd/dependencies/dependents",
+  "sequence": [
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:8000/api/v1/task/e3e70682-c209-1cac-a29f-6fbed82c07cd/dependencies/dependents",
+      "url_template": "http://127.0.0.1:8000/api/v1/task/{task_id}/dependencies/dependents",
+      "headers": {
+        "User-Agent": "schemathesis/4.32.4",
+        "Accept-Encoding": "gzip, deflate, zstd",
+        "Accept": "*/*",
+        "Connection": "keep-alive",
+        "X-Schemathesis-TestCaseId": "sGGU56"
+      },
+      "response": {
+        "status_code": 401,
+        "headers": {
+          "date": "Fri, 23 Oct 2026 13:21:52 GMT",
+          "server": "uvicorn",
+          "www-authenticate": "[Filtered]",
+          "content-length": "30",
+          "content-type": "application/json",
+          "vary": "Origin"
+        },
+        "body": "{\"detail\":\"Not authenticated\"}"
+      },
+      "link": null,
+      "checks": [
+        {
+          "name": "status_code_conformance",
+          "status": "failure",
+          "message": "Undocumented status code\n\nReceived: 401\nDocumented: 200, 422"
+        }
+      ],
+      "meta": {
+        "generation": {
+          "time": 2.5421999453101307e-05,
+          "mode": "negative"
+        },
+        "components": {
+          "PATH": "positive",
+          "HEADER": "negative"
+        },
+        "phase": {
+          "name": "coverage",
+          "data": {
+            "type": "CoveragePhaseData",
+            "description": "Missing `Authorization` at header",
+            "location": null,
+            "parameter": "Authorization",
+            "parameter_location": "HEADER",
+            "scenario": "missing_parameter"
+          }
+        },
+        "pool_draws": [],
+        "pool_misses": [
+          [
+            "path",
+            "task_id"
+          ]
+        ],
+        "semantic_draws": [],
+        "dictionary_draws": [],
+        "constants_draws": [],
+        "raw_containers": {
+          "PATH": {
+            "task_id": "e3e70682-c209-1cac-a29f-6fbed82c07cd"
+          },
+          "HEADER": {}
+        }
+      },
+      "path": "/api/v1/task/{task_id}/dependencies/dependents",
+      "path_parameters": {
+        "task_id": "e3e70682-c209-1cac-a29f-6fbed82c07cd"
+      },
+      "query": {},
+      "case_headers": {},
+      "cookies": {},
+      "case_body": {
+        "encoding": "none"
+      },
+      "media_type": null,
+      "parent_index": null,
+      "auth_identity": null,
+      "operation": "GET /api/v1/task/{task_id}/dependencies/dependents"
+    }
+  ]
+}

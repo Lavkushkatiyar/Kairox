@@ -8,7 +8,10 @@ authors = [
 ]
 requires-python = ">=3.14"
 dependencies = [
+    "argon2-cffi>=25.1.0",
     "celery>=5.6.3",
+    "logger>=1.4",
+    "pip>=26.2.2",
     "psycopg>=3.3.6",
     "pydantic[email]>=2.14.1",
     "redis>=8.1.0",
@@ -21,3 +24,10 @@ kairox = "kairox:main"
 [build-system]
 requires = ["uv_build>=0.12.19,<0.13.0"]
 build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "httpx>=0.28.1",
+    "pytest>=9.1.1",
+    "schemathesis>=4.32.4",
+]

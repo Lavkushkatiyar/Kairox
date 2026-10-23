@@ -1,0 +1,85 @@
+{
+  "operation": "POST /api/v1/auth/login",
+  "method": "POST",
+  "path_template": "/api/v1/auth/login",
+  "fingerprint": "5bd9fc8f",
+  "case_id": "ZvLHpv",
+  "code_sample": "curl -X POST -H 'Content-Type: application/json' -d '{\"email\": \"0@0.com\", \"password\": \"[Filtered]\"}' http://127.0.0.1:8000/api/v1/auth/login",
+  "sequence": [
+    {
+      "method": "POST",
+      "url": "http://127.0.0.1:8000/api/v1/auth/login",
+      "url_template": "http://127.0.0.1:8000/api/v1/auth/login",
+      "headers": {
+        "User-Agent": "schemathesis/4.32.4",
+        "Accept-Encoding": "gzip, deflate, zstd",
+        "Accept": "*/*",
+        "Connection": "keep-alive",
+        "X-Schemathesis-TestCaseId": "ZvLHpv",
+        "Content-Type": "application/json",
+        "Content-Length": "36"
+      },
+      "response": {
+        "status_code": 401,
+        "headers": {
+          "date": "Fri, 23 Oct 2026 13:21:30 GMT",
+          "server": "uvicorn",
+          "content-length": "43",
+          "content-type": "application/json",
+          "vary": "Origin"
+        },
+        "body": "{\"detail\":\"User with this email not found\"}"
+      },
+      "link": null,
+      "checks": [
+        {
+          "name": "status_code_conformance",
+          "status": "failure",
+          "message": "Undocumented status code\n\nReceived: 401\nDocumented: 200, 422"
+        }
+      ],
+      "meta": {
+        "generation": {
+          "time": 0.0100278600002639,
+          "mode": "positive"
+        },
+        "components": {
+          "BODY": "positive"
+        },
+        "phase": {
+          "name": "coverage",
+          "data": {
+            "type": "CoveragePhaseData",
+            "description": "Valid object",
+            "location": null,
+            "parameter": "application/json",
+            "parameter_location": "BODY",
+            "scenario": "valid_object"
+          }
+        },
+        "pool_draws": [],
+        "pool_misses": [],
+        "semantic_draws": [],
+        "dictionary_draws": [],
+        "constants_draws": [],
+        "raw_containers": {}
+      },
+      "path": "/api/v1/auth/login",
+      "path_parameters": {},
+      "query": {},
+      "case_headers": {},
+      "cookies": {},
+      "case_body": {
+        "encoding": "json",
+        "value": {
+          "email": "0@0.com",
+          "password": "[Filtered]"
+        }
+      },
+      "media_type": "application/json",
+      "parent_index": null,
+      "auth_identity": null,
+      "operation": "POST /api/v1/auth/login"
+    }
+  ]
+}

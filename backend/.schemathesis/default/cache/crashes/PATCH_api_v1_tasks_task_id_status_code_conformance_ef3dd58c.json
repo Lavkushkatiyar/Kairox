@@ -1,0 +1,100 @@
+{
+  "operation": "PATCH /api/v1/tasks/{task_id}",
+  "method": "PATCH",
+  "path_template": "/api/v1/tasks/{task_id}",
+  "fingerprint": "ef3dd58c",
+  "case_id": "V252Po",
+  "code_sample": "curl -X PATCH -H 'Authorization: [Filtered]' http://127.0.0.1:8000/api/v1/tasks/e3e70682-c209-1cac-a29f-6fbed82c07cd",
+  "sequence": [
+    {
+      "method": "PATCH",
+      "url": "http://127.0.0.1:8000/api/v1/tasks/e3e70682-c209-1cac-a29f-6fbed82c07cd",
+      "url_template": "http://127.0.0.1:8000/api/v1/tasks/{task_id}",
+      "headers": {
+        "User-Agent": "schemathesis/4.32.4",
+        "Accept-Encoding": "gzip, deflate, zstd",
+        "Accept": "*/*",
+        "Connection": "keep-alive",
+        "Authorization": "[Filtered]",
+        "X-Schemathesis-TestCaseId": "V252Po",
+        "Content-Length": "0"
+      },
+      "response": {
+        "status_code": 401,
+        "headers": {
+          "date": "Fri, 23 Oct 2026 13:21:52 GMT",
+          "server": "uvicorn",
+          "www-authenticate": "[Filtered]",
+          "content-length": "30",
+          "content-type": "application/json",
+          "vary": "Origin"
+        },
+        "body": "{\"detail\":\"Not authenticated\"}"
+      },
+      "link": null,
+      "checks": [
+        {
+          "name": "status_code_conformance",
+          "status": "failure",
+          "message": "Undocumented status code\n\nReceived: 401\nDocumented: 200, 422"
+        }
+      ],
+      "meta": {
+        "generation": {
+          "time": 3.828599983535241e-05,
+          "mode": "negative"
+        },
+        "components": {
+          "PATH": "positive",
+          "HEADER": "positive",
+          "BODY": "negative"
+        },
+        "phase": {
+          "name": "coverage",
+          "data": {
+            "type": "CoveragePhaseData",
+            "description": "Missing request body",
+            "location": null,
+            "parameter": null,
+            "parameter_location": "BODY",
+            "scenario": "missing_parameter"
+          }
+        },
+        "pool_draws": [],
+        "pool_misses": [
+          [
+            "path",
+            "task_id"
+          ]
+        ],
+        "semantic_draws": [],
+        "dictionary_draws": [],
+        "constants_draws": [],
+        "raw_containers": {
+          "PATH": {
+            "task_id": "e3e70682-c209-1cac-a29f-6fbed82c07cd"
+          },
+          "HEADER": {
+            "Authorization": "Bearer "
+          }
+        }
+      },
+      "path": "/api/v1/tasks/{task_id}",
+      "path_parameters": {
+        "task_id": "e3e70682-c209-1cac-a29f-6fbed82c07cd"
+      },
+      "query": {},
+      "case_headers": {
+        "Authorization": "[Filtered]"
+      },
+      "cookies": {},
+      "case_body": {
+        "encoding": "none"
+      },
+      "media_type": null,
+      "parent_index": null,
+      "auth_identity": null,
+      "operation": "PATCH /api/v1/tasks/{task_id}"
+    }
+  ]
+}
