@@ -1,12 +1,11 @@
 from datetime import datetime
 from uuid import UUID
 
-from fastapi import HTTPException
-from sqlalchemy.orm import Session
-
 from app.models.reminder import Reminder
 from app.schemas.reminder import *
 from app.services.task_service import TaskService
+from fastapi import HTTPException
+from sqlalchemy.orm import Session
 
 
 class ReminderService:
@@ -43,7 +42,10 @@ class ReminderService:
 
     @staticmethod
     def get_reminders(
-        db: Session, user_id: UUID, upcoming_only: bool = False, task_id: UUID | None = None
+        db: Session,
+        user_id: UUID,
+        upcoming_only: bool = False,
+        task_id: UUID | None = None,
     ) -> List[ReminderRead]:
         reminders = db.query(Reminder).filter(Reminder.user_id == user_id)
 

@@ -2,11 +2,10 @@ import enum
 import uuid
 from datetime import datetime
 
+from app.db.base import Base
 from sqlalchemy import Column, DateTime, Enum, ForeignKey, String, Text
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
-
-from app.db.base import Base
 
 
 class InputStatus(str, enum.Enum):

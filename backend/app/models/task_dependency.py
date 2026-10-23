@@ -1,10 +1,9 @@
 import uuid
 from datetime import datetime
 
+from app.db.base import Base
 from sqlalchemy import CheckConstraint, Column, DateTime, ForeignKey, UniqueConstraint
 from sqlalchemy.dialects.postgresql import UUID
-
-from app.db.base import Base
 
 
 class TaskDependency(Base):

@@ -1,11 +1,10 @@
 from collections import deque
 from uuid import UUID
 
-from fastapi import HTTPException
-from sqlalchemy.orm import Session
-
 from app.models import Task, TaskDependency
 from app.services.task_service import TaskService
+from fastapi import HTTPException
+from sqlalchemy.orm import Session
 
 
 class DependencyServices:

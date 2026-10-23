@@ -1,8 +1,7 @@
 import logging
 
-from celery import Task
-
 from app.db.session import SessionLocal
+from celery import Task
 
 logger = logging.getLogger(__name__)
 

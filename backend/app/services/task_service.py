@@ -1,31 +1,72 @@
 from datetime import UTC, datetime
 from uuid import UUID
 
-from fastapi import HTTPException
-from sqlalchemy.orm import Session
-
 from app.models.task import Task
 from app.schemas.task import TaskCreate, TaskRead, TaskStats, TaskStatus, TaskUpdate
+from fastapi import HTTPException
+from sqlalchemy.orm import Session
 
 
 class TaskService:
     @staticmethod
-    def create_task(db: Session, user_id: UUID, data: TaskCreate) -> TaskRead:
+    def create_task(
+        db: Session,
+        user_id: UUID,
+        input_id: UUID,
+        data: TaskCreate,
+        ai_generated: bool = False,
+    ) -> TaskRead:
 
         task = Task(
             user_id=user_id,
-            input_id=data.input_id,
+            input_id=input_id,
             title=data.title,
             description=data.description,
             status=data.status,
             priority=data.priority,
             task_type=data.task_type,
             due_at=data.due_at,
+            ai_generated=ai_generated,
         )
         db.add(task)
         db.commit()
         db.refresh(task)
         return task
+
+    @staticmethod
+    def create_ai_task(
+        db: Session,
+        parsed_input: dict,
+        user_id: UUID,
+        input_id: UUID,
+    ) -> list[Task]:
+        tasks = []
+
+        task_type_mapping = {
+            "todo": "action",
+            "meeting": "event",
+            "appointment": "event",
+            "reminder": "action",
+        }
+
+        for item in parsed_input["tasks"]:
+            task_data = TaskCreate(
+                title=item["title"],
+                priority=item["priority"],
+                task_type=task_type_mapping[item["type"]],
+                due_at=None,
+            )
+
+            task = TaskService.create_task(
+                db=db,
+                user_id=user_id,
+                input_id=input_id,
+                data=task_data,
+                ai_generated=True,
+            )
+            tasks.append(task)
+
+        return tasks
 
     @staticmethod
     def get_tasks(db: Session, user_id: UUID) -> list[TaskRead]:
