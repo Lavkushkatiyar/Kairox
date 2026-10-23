@@ -47,8 +47,6 @@ class AIServices:
         }
 
     def _post_request(self, url: str, payload) -> dict:
-        print("sending request")
-        print(payload, url, "real data ")
         response = requests.post(
             url,
             json=payload,
@@ -71,7 +69,6 @@ class AIServices:
         print(result)
 
         if provider == "ollama":
-            print(result)
             output = result.get("message", {}).get("content")
             return AI_TASK_FORMAT.model_validate_json(output).model_dump()
 

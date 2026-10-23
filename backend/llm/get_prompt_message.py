@@ -22,6 +22,3 @@ def get_prompted_message(user_message):
             "content": user_message,
         },
     ]
-
-
-print(get_prompted_message("Hi i love you "))
