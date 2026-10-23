@@ -1,16 +1,14 @@
 from datetime import datetime
 from uuid import UUID
 
-from pydantic import BaseModel, Field
-
 from app.models.task import TaskPriority, TaskStatus, TaskType
+from pydantic import BaseModel, Field
 
 
 class TaskCreate(BaseModel):
     """Create Task Schema"""
 
     title: str = Field(..., min_length=1, max_length=255)
-    input_id: UUID | None = None
     description: str | None = Field(None, max_length=1000)
 
     due_at: datetime | None = None
