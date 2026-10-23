@@ -6,7 +6,7 @@ from celery import Task
 logger = logging.getLogger(__name__)
 
 
-class KarioxTask(Task):
+class CeleryTaskBase(Task):
     """Base task for the Kairox"""
 
     _db = None

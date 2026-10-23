@@ -1,15 +1,17 @@
 from datetime import datetime
 from uuid import UUID
-
-from app.schemas.task import Task, TaskCreate, TaskStatus, TaskUpdate
+from app.models.task import Task
+from app.schemas.task import TaskRead, TaskCreate, TaskStatus, TaskUpdate,TaskStats
 from fastapi import HTTPException
+from datetime import timezone
 from sqlalchemy.orm import Session
 
 
 class TaskService:
     @staticmethod
-    def create_task(db: Session, user_id: UUID, data: TaskCreate) -> Task:
-        task = Task(
+    def create_task(db: Session, user_id: UUID, data: TaskCreate) -> TaskRead:
+        
+        task = TaskCreate(
             user_id=user_id,
             input_id=data.input_id,
             title=data.title,
@@ -25,22 +27,22 @@ class TaskService:
         return task
 
     @staticmethod
-    def get_tasks(db: Session, user_id: UUID) -> list[Task]:
+    def get_tasks(db: Session, user_id: UUID) -> list[TaskRead]:
         return db.query(Task).filter(Task.user_id == user_id).all()
 
     @staticmethod
     def get_task(db: Session, user_id: UUID, task_id: UUID) -> Task:
-        task = (
+        tasks = (
             db.query(Task).filter(Task.user_id == user_id, Task.id == task_id).first()
         )
-        if not task:
+        if not tasks:
             raise HTTPException(status_code=404, detail="Task not found")
-        return task
+        return tasks
 
     @staticmethod
     def updated_task(
         db: Session, user_id: UUID, task_id: UUID, data: TaskUpdate
-    ) -> Task:
+    ) -> TaskRead:
         task = TaskService.get_task(db, user_id, task_id)
         if not task:
             raise HTTPException(status_code=404, detail="Task not found")
@@ -50,13 +52,13 @@ class TaskService:
         task.priority = data.priority
         task.task_type = data.task_type
         task.due_at = data.due_at
-        task.updated_at = datetime.utcnow()
+        task.updated_at = datetime.now(timezone.utc)
 
         db.add(task)
         db.commit()
         db.refresh(task)
         return task
-
+    @staticmethod
     def delete_task(db: Session, user_id: UUID, task_id: UUID) -> Task:
         task = TaskService.get_task(db, user_id, task_id)
         if not task:
@@ -64,7 +66,7 @@ class TaskService:
         db.delete(task)
         db.commit()
         return task
-
+    @staticmethod
     def get_task_stats(db: Session, user_id: UUID):
         tasks = TaskService.get_tasks(db, user_id)
         total = len(tasks)
@@ -76,8 +78,6 @@ class TaskService:
         }
         for task in tasks:
             by_status[task.status] += 1
-
-        return {"total": total, "by_status": by_status}
         by_priority = {
             "low": 0,
             "medium": 0,
@@ -89,7 +89,7 @@ class TaskService:
             if (
                 task.due_at is not None
                 and task.status != TaskStatus.DONE
-                and task.due_at < datetime.utcnow()
+                and task.due_at < datetime.now(timezone.utc)
             ):
                 overdue += 1
 

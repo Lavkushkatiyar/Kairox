@@ -1,0 +1,100 @@
+{
+  "operation": "DELETE /api/v1/task/{task_id}/dependencies/",
+  "method": "DELETE",
+  "path_template": "/api/v1/task/{task_id}/dependencies/",
+  "fingerprint": "c2de441f",
+  "case_id": "FAzb8T",
+  "code_sample": "curl -X DELETE 'http://127.0.0.1:8000/api/v1/task/e3e70682-c209-1cac-a29f-6fbed82c07cd/dependencies/?dependency_id=e3e70682-c209-1cac-a29f-6fbed82c07cd'",
+  "sequence": [
+    {
+      "method": "DELETE",
+      "url": "http://127.0.0.1:8000/api/v1/task/e3e70682-c209-1cac-a29f-6fbed82c07cd/dependencies/?dependency_id=e3e70682-c209-1cac-a29f-6fbed82c07cd",
+      "url_template": "http://127.0.0.1:8000/api/v1/task/{task_id}/dependencies/",
+      "headers": {
+        "User-Agent": "schemathesis/4.32.4",
+        "Accept-Encoding": "gzip, deflate, zstd",
+        "Accept": "*/*",
+        "Connection": "keep-alive",
+        "X-Schemathesis-TestCaseId": "FAzb8T",
+        "Content-Length": "0"
+      },
+      "response": {
+        "status_code": 500,
+        "headers": {
+          "date": "Fri, 23 Oct 2026 13:21:52 GMT",
+          "server": "uvicorn",
+          "content-length": "21",
+          "content-type": "text/plain; charset=utf-8"
+        },
+        "body": "Internal Server Error"
+      },
+      "link": null,
+      "checks": [
+        {
+          "name": "not_a_server_error",
+          "status": "failure",
+          "message": "Server error"
+        }
+      ],
+      "meta": {
+        "generation": {
+          "time": 0.0003738750001502922,
+          "mode": "positive"
+        },
+        "components": {
+          "PATH": "positive",
+          "QUERY": "positive"
+        },
+        "phase": {
+          "name": "coverage",
+          "data": {
+            "type": "CoveragePhaseData",
+            "description": "Default positive test case",
+            "location": null,
+            "parameter": null,
+            "parameter_location": null,
+            "scenario": "default_positive_test"
+          }
+        },
+        "pool_draws": [],
+        "pool_misses": [
+          [
+            "path",
+            "task_id"
+          ],
+          [
+            "query",
+            "dependency_id"
+          ]
+        ],
+        "semantic_draws": [],
+        "dictionary_draws": [],
+        "constants_draws": [],
+        "raw_containers": {
+          "PATH": {
+            "task_id": "e3e70682-c209-1cac-a29f-6fbed82c07cd"
+          },
+          "QUERY": {
+            "dependency_id": "e3e70682-c209-1cac-a29f-6fbed82c07cd"
+          }
+        }
+      },
+      "path": "/api/v1/task/{task_id}/dependencies/",
+      "path_parameters": {
+        "task_id": "e3e70682-c209-1cac-a29f-6fbed82c07cd"
+      },
+      "query": {
+        "dependency_id": "e3e70682-c209-1cac-a29f-6fbed82c07cd"
+      },
+      "case_headers": {},
+      "cookies": {},
+      "case_body": {
+        "encoding": "none"
+      },
+      "media_type": null,
+      "parent_index": null,
+      "auth_identity": null,
+      "operation": "DELETE /api/v1/task/{task_id}/dependencies/"
+    }
+  ]
+}

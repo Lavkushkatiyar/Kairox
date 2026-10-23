@@ -1,0 +1,84 @@
+{
+  "operation": "POST /api/v1/auth/refresh",
+  "method": "POST",
+  "path_template": "/api/v1/auth/refresh",
+  "fingerprint": "bf447c72",
+  "case_id": "3M0Yv8",
+  "code_sample": "curl -X POST -H 'Content-Type: application/json' -d '{\"refresh_token\": \"[Filtered]\"}' http://127.0.0.1:8000/api/v1/auth/refresh",
+  "sequence": [
+    {
+      "method": "POST",
+      "url": "http://127.0.0.1:8000/api/v1/auth/refresh",
+      "url_template": "http://127.0.0.1:8000/api/v1/auth/refresh",
+      "headers": {
+        "User-Agent": "schemathesis/4.32.4",
+        "Accept-Encoding": "gzip, deflate, zstd",
+        "Accept": "*/*",
+        "Connection": "keep-alive",
+        "X-Schemathesis-TestCaseId": "3M0Yv8",
+        "Content-Type": "application/json",
+        "Content-Length": "21"
+      },
+      "response": {
+        "status_code": 401,
+        "headers": {
+          "date": "Fri, 23 Oct 2026 13:21:30 GMT",
+          "server": "uvicorn",
+          "content-length": "26",
+          "content-type": "application/json",
+          "vary": "Origin"
+        },
+        "body": "{\"detail\":\"Invalid token\"}"
+      },
+      "link": null,
+      "checks": [
+        {
+          "name": "status_code_conformance",
+          "status": "failure",
+          "message": "Undocumented status code\n\nReceived: 401\nDocumented: 200, 422"
+        }
+      ],
+      "meta": {
+        "generation": {
+          "time": 0.0012104679999538348,
+          "mode": "positive"
+        },
+        "components": {
+          "BODY": "positive"
+        },
+        "phase": {
+          "name": "coverage",
+          "data": {
+            "type": "CoveragePhaseData",
+            "description": "Valid object",
+            "location": null,
+            "parameter": "application/json",
+            "parameter_location": "BODY",
+            "scenario": "valid_object"
+          }
+        },
+        "pool_draws": [],
+        "pool_misses": [],
+        "semantic_draws": [],
+        "dictionary_draws": [],
+        "constants_draws": [],
+        "raw_containers": {}
+      },
+      "path": "/api/v1/auth/refresh",
+      "path_parameters": {},
+      "query": {},
+      "case_headers": {},
+      "cookies": {},
+      "case_body": {
+        "encoding": "json",
+        "value": {
+          "refresh_token": "[Filtered]"
+        }
+      },
+      "media_type": "application/json",
+      "parent_index": null,
+      "auth_identity": null,
+      "operation": "POST /api/v1/auth/refresh"
+    }
+  ]
+}
