@@ -21,4 +21,7 @@ celery_app.conf.update(
 )
 
 celery_app.autodiscover_tasks(["app.workers.tasks"])
-celery_app.conf.imports = ("app.workers.tasks.test_task",)
+celery_app.conf.imports = (
+    "app.workers.tasks.test_task",
+    "app.workers.tasks.process_input",
+)

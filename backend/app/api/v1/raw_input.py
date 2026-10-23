@@ -1,10 +1,12 @@
+from fastapi import APIRouter, Depends
+from sqlalchemy.orm import Session
+
 from app.api.auth_dependencies import get_current_user
 from app.db.session import get_db
 from app.models.user import User
 from app.schemas.raw_input import RawInputCreate, RawInputResponse
 from app.services.raw_input_service import RawInputService
-from fastapi import APIRouter, Depends
-from sqlalchemy.orm import Session
+from app.workers.tasks.process_input import process_rawInput
 
 router = APIRouter(prefix="/inputs", tags=["Raw Inputs"])
 
@@ -15,7 +17,11 @@ def create_input(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    return RawInputService.create_input(db=db, user_id=current_user.id, payload=payload)
+    raw_input = RawInputService.create_input(
+        db=db, user_id=current_user.id, payload=payload
+    )
+    process_rawInput.delay(str(raw_input.id))
+    return raw_input
 
 
 @router.get("", response_model=list[RawInputResponse])

@@ -1,16 +1,17 @@
-from datetime import datetime
+from datetime import UTC, datetime
 from uuid import UUID
-from app.models.task import Task
-from app.schemas.task import TaskRead, TaskCreate, TaskStatus, TaskUpdate,TaskStats
+
 from fastapi import HTTPException
-from datetime import timezone
 from sqlalchemy.orm import Session
+
+from app.models.task import Task
+from app.schemas.task import TaskCreate, TaskRead, TaskStats, TaskStatus, TaskUpdate
 
 
 class TaskService:
     @staticmethod
     def create_task(db: Session, user_id: UUID, data: TaskCreate) -> TaskRead:
-        
+
         task = TaskCreate(
             user_id=user_id,
             input_id=data.input_id,
@@ -52,12 +53,13 @@ class TaskService:
         task.priority = data.priority
         task.task_type = data.task_type
         task.due_at = data.due_at
-        task.updated_at = datetime.now(timezone.utc)
+        task.updated_at = datetime.now(UTC)
 
         db.add(task)
         db.commit()
         db.refresh(task)
         return task
+
     @staticmethod
     def delete_task(db: Session, user_id: UUID, task_id: UUID) -> Task:
         task = TaskService.get_task(db, user_id, task_id)
@@ -66,6 +68,7 @@ class TaskService:
         db.delete(task)
         db.commit()
         return task
+
     @staticmethod
     def get_task_stats(db: Session, user_id: UUID):
         tasks = TaskService.get_tasks(db, user_id)
@@ -89,7 +92,7 @@ class TaskService:
             if (
                 task.due_at is not None
                 and task.status != TaskStatus.DONE
-                and task.due_at < datetime.now(timezone.utc)
+                and task.due_at < datetime.now(UTC)
             ):
                 overdue += 1
 

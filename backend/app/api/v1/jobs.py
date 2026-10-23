@@ -1,7 +1,8 @@
+from fastapi import APIRouter, Depends
+
 from app.api.auth_dependencies import get_current_user
 from app.models.user import User
 from app.workers.celery_app import celery_app
-from fastapi import APIRouter, Depends
 
 router = APIRouter(prefix="/jobs", tags=["Jobs"])
 

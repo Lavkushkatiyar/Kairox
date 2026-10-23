@@ -1,4 +1,5 @@
 import requests
+
 from app.schemas.ai_response import AI_TASK_FORMAT
 
 REQUEST_TIME_OUT = 600
