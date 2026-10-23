@@ -27,7 +27,7 @@ class ReminderService:
     def create_reminder(
         db: Session, user_id: UUID, task_id: UUID, data: ReminderCreate
     ) -> Reminder:
-        task = TaskService.get_task(db, user_id, task_id)
+        TaskService.get_task(db, user_id, task_id)
         reminder = Reminder(
             user_id=user_id,
             task_id=task_id,
@@ -43,7 +43,7 @@ class ReminderService:
 
     @staticmethod
     def get_reminders(
-        db: Session, user_id: UUID, upcoming_only: bool = False, task_id: UUID = None
+        db: Session, user_id: UUID, upcoming_only: bool = False, task_id: UUID | None = None
     ) -> List[ReminderRead]:
         reminders = db.query(Reminder).filter(Reminder.user_id == user_id)
 

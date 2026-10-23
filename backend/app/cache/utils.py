@@ -11,7 +11,7 @@ async def get_cache(key: str):
     return None
 
 
-async def set_cache(key: str, value, ttl: int = None):
+async def set_cache(key: str, value, ttl: int | None = None):
     redis = await get_redis()
     if ttl:
         await redis.set(key, json.dumps(value), ex=ttl)

@@ -12,7 +12,7 @@ class TaskService:
     @staticmethod
     def create_task(db: Session, user_id: UUID, data: TaskCreate) -> TaskRead:
 
-        task = TaskCreate(
+        task = Task(
             user_id=user_id,
             input_id=data.input_id,
             title=data.title,
