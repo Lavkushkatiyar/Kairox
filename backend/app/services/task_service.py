@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 
 from app.models.task import Task
 from app.schemas.task import TaskCreate, TaskRead, TaskStats, TaskStatus, TaskUpdate
+from app.services.time_resolver import TimeResolver
 
 
 class TaskService:
@@ -41,6 +42,7 @@ class TaskService:
         user_id: UUID,
         input_id: UUID,
     ) -> list[Task]:
+        resolver = TimeResolver()
         tasks = []
 
         task_type_mapping = {
@@ -55,7 +57,7 @@ class TaskService:
                 title=item["title"],
                 priority=item["priority"],
                 task_type=task_type_mapping[item["type"]],
-                due_at=None,
+                due_at=resolver.resolve(item.get("due_expression")),
             )
 
             task = TaskService.create_task(
@@ -75,12 +77,12 @@ class TaskService:
 
     @staticmethod
     def get_task(db: Session, user_id: UUID, task_id: UUID) -> Task:
-        tasks = (
+        task = (
             db.query(Task).filter(Task.user_id == user_id, Task.id == task_id).first()
         )
-        if not tasks:
+        if not task:
             raise HTTPException(status_code=404, detail="Task not found")
-        return tasks
+        return task
 
     @staticmethod
     def updated_task(

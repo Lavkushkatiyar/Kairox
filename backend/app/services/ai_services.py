@@ -20,7 +20,7 @@ class AIServices:
         self.provider = provider
         self.model = model
 
-    def generate_response(self, message) -> list[TaskCreate]:
+    def createTaskFromRawInput(self, message) -> list[TaskCreate]:
         payload = self._build_payload(message)
 
         response = self._post_request(self.API_URL, payload)

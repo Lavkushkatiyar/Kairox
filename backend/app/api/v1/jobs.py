@@ -23,7 +23,7 @@ def get_job_status(job_id: str, current_user: User = Depends(get_current_user)):
 @router.post("/test")
 def trigger_test_job(message: str = "Hello Kairox"):
     """Trigger a test job for verifying worker setup."""
-    from tests.workers.test_task import test_task
+    from backend.app.workers.tasks.test_task import test_task
 
     result = test_task.delay(message)
 
