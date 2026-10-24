@@ -38,7 +38,7 @@ def _parse_input(raw_text):
         API_URL=settings.API_URL,
     )
 
-    return llm.generate_response(raw_text)
+    return llm.createTaskFromRawInput(raw_text)
 
 
 def _create_tasks(db, parsed_output, user_uuid, input_uuid):
