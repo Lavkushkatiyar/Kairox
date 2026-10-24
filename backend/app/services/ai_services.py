@@ -1,7 +1,5 @@
 import requests
-
 from app.schemas.ai_response import AI_TASK_FORMAT
-from app.schemas.task import TaskCreate
 from llm.get_prompt_message import get_prompted_message
 
 REQUEST_TIME_OUT = 600
@@ -20,7 +18,7 @@ class AIServices:
         self.provider = provider
         self.model = model
 
-    def createTaskFromRawInput(self, message) -> list[TaskCreate]:
+    def createTaskFromRawInput(self, message):
         print("got the message ", message)
         payload = self._build_payload(message)
 

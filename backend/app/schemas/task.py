@@ -1,9 +1,8 @@
 from datetime import datetime
 from uuid import UUID
 
-from pydantic import BaseModel, Field
-
 from app.models.task import TaskPriority, TaskStatus, TaskType
+from pydantic import BaseModel, Field
 
 
 class TaskCreate(BaseModel):

@@ -1,9 +1,8 @@
 from uuid import UUID
 
-from sqlalchemy.orm import Session
-
 from app.models.raw_input import RawInput
 from app.schemas.raw_input import RawInputCreate
+from sqlalchemy.orm import Session
 
 
 class RawInputService:

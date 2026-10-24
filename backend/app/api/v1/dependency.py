@@ -1,14 +1,13 @@
 from uuid import UUID
 
-from fastapi import APIRouter, Depends
-from sqlalchemy.orm import Session
-
 from app.api.auth_dependencies import get_current_user
 from app.db.session import get_db
 from app.models.user import User
 from app.schemas.dependency import DependencyCreate, DependencyRead
 from app.schemas.task import TaskRead
 from app.services.dependency_service import DependencyServices
+from fastapi import APIRouter, Depends
+from sqlalchemy.orm import Session
 
 router = APIRouter(prefix="/task/{task_id}/dependencies", tags=["Dependencies"])
 
@@ -19,13 +18,16 @@ def add_dependency(
     data: DependencyCreate,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
+    commit: bool = True,
 ):
-    return DependencyServices.add_dependency(
+    dependency = DependencyServices.add_dependency(
         db=db,
         user_id=current_user.id,
         task_id=task_id,
         depends_on_id=data.depends_on_id,
+        commit=commit,
     )
+    return dependency
 
 
 @router.get("/", response_model=list[DependencyRead], status_code=201)
@@ -34,15 +36,23 @@ def get_dependency(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    return DependencyServices.get_task_dependency(db=db, task_id=task_id)
+    return DependencyServices.get_task_dependency(
+        db=db, task_id=task_id, user_id=current_user.id
+    )
 
 
 @router.delete("/", response_model=DependencyRead, status_code=200)
 def delete_dependency(
-    task_id: UUID, dependency_id: UUID, db: Session = Depends(get_db)
+    task_id: UUID,
+    dependency_id: UUID,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
 ):
     return DependencyServices.remove_dependency(
-        db=db, task_id=task_id, dependency_id=dependency_id
+        db=db,
+        task_id=task_id,
+        dependency_id=dependency_id,
+        user_id=current_user.id,
     )
 
 

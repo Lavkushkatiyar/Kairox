@@ -1,10 +1,10 @@
 import enum
 import uuid
-from datetime import datetime
+from datetime import UTC, datetime
 
+from app.db.base import Base
 from sqlalchemy import (
     Boolean,
-    Column,
     DateTime,
     Enum,
     Float,
@@ -14,9 +14,7 @@ from sqlalchemy import (
     Text,
 )
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import relationship
-
-from app.db.base import Base
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 
 class TaskStatus(str, enum.Enum):
@@ -43,50 +41,65 @@ class TaskType(str, enum.Enum):
 class Task(Base):
     __tablename__ = "tasks"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
-    user_id = Column(
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True
+    )
+    user_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), ForeignKey("users.id"), nullable=False, index=True
     )
-    input_id = Column(
+    input_id: Mapped[uuid.UUID | None] = mapped_column(
         UUID(as_uuid=True), ForeignKey("raw_inputs.id"), nullable=True, index=True
     )
 
-    title = Column(String(255), index=True, nullable=False)
-    description = Column(Text, nullable=True)
-    status = Column(
+    title: Mapped[str] = mapped_column(String(255), index=True, nullable=False)
+    description: Mapped[str | None] = mapped_column(Text, nullable=True)
+    status: Mapped[TaskStatus] = mapped_column(
         Enum(TaskStatus),
         default=TaskStatus.TODO,
         nullable=False,
     )
 
-    priority = Column(
+    priority: Mapped[TaskPriority] = mapped_column(
         Enum(TaskPriority),
         default=TaskPriority.MEDIUM,
         nullable=False,
     )
 
-    task_type = Column(
+    task_type: Mapped[TaskType] = mapped_column(
         Enum(TaskType),
         default=TaskType.ACTION,
         nullable=False,
     )
-    due_at = Column(DateTime, nullable=True)
-    completed_at = Column(DateTime, nullable=True)
-    sort_order = Column(Integer, default=0)
-    ai_generated = Column(Boolean, default=False)
-    ai_confidence = Column(Float, nullable=True)
-    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
-    updated_at = Column(
-        DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False
+    due_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    completed_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    sort_order: Mapped[int] = mapped_column(Integer, default=0)
+    ai_generated: Mapped[bool] = mapped_column(Boolean, default=False)
+    ai_confidence: Mapped[float | None] = mapped_column(Float, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime, default=lambda: datetime.now(UTC).replace(tzinfo=None), nullable=False
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime,
+        default=lambda: datetime.now(UTC).replace(tzinfo=None),
+        onupdate=lambda: datetime.now(UTC).replace(tzinfo=None),
+        nullable=False,
     )
     user = relationship("User", backref="tasks")
     input = relationship("RawInput", back_populates="tasks")
-    dependencies = relationship(
+    dependencies: Mapped[list[Task]] = relationship(
         "Task",
         secondary="task_dependencies",
         primaryjoin="Task.id == TaskDependency.task_id",
         secondaryjoin="Task.id == TaskDependency.depends_on_id",
-        backref="dependents",
+        back_populates="dependents",
+        lazy="selectin",
+    )
+    dependents: Mapped[list[Task]] = relationship(
+        "Task",
+        secondary="task_dependencies",
+        primaryjoin="Task.id == TaskDependency.depends_on_id",
+        secondaryjoin="Task.id == TaskDependency.task_id",
+        back_populates="dependencies",
         lazy="selectin",
     )
     reminders = relationship(
