@@ -1,4 +1,4 @@
-{
+  {
   "operation": "GET /api/v1/jobs/{job_id}/status",
   "method": "GET",
   "path_template": "/api/v1/jobs/{job_id}/status",

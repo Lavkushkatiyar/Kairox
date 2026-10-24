@@ -1,3 +1,7 @@
+from fastapi import Depends
+from fastapi.security import OAuth2PasswordBearer
+from sqlalchemy.orm import Session
+
 from app.core.config import settings
 from app.db.session import get_db
 from app.models.user import User
@@ -9,9 +13,6 @@ from app.utils.security import (
     hash_password,
     verify_password,
 )
-from fastapi import Depends
-from fastapi.security import OAuth2PasswordBearer
-from sqlalchemy.orm import Session
 
 
 class AuthService:
