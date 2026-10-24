@@ -1,19 +1,5 @@
-from enum import Enum
-
-from pydantic import BaseModel
-
-
-class TaskType(str, Enum):
-    TODO = "todo"
-    MEETING = "meeting"
-    APPOINTMENT = "appointment"
-    REMINDER = "reminder"
-
-
-class TaskPriority(str, Enum):
-    HIGH = "high"
-    MEDIUM = "medium"
-    LOW = "low"
+from app.models.task import TaskPriority, TaskType
+from pydantic import BaseModel, Field
 
 
 class ExtractedTask(BaseModel):
@@ -21,6 +7,7 @@ class ExtractedTask(BaseModel):
     type: TaskType
     priority: TaskPriority
     due_expression: str | None = None
+    depends_on_titles: list[str] = Field(default_factory=list)
 
 
 class AI_TASK_FORMAT(BaseModel):

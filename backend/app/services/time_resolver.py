@@ -34,28 +34,24 @@ class TimeResolver:
             expression,
         ):
             return self._in_hours_minutes(match)
-        
-        if match:=re.fullmatch(
+
+        if match := re.fullmatch(
             r"before (\d{1,2})(?::(\d{2}))?\s*(am|pm)?",
             expression,
         ):
             return self._before_time_handle(match)
-        
+
         if expression in ("end of day", "eod", "by end of day"):
-            target = self.reference.replace(
-                hour=18, minute=0, second=0, microsecond=0
-            )
+            target = self.reference.replace(hour=18, minute=0, second=0, microsecond=0)
             return self._to_utc(target)
-        
+
         if match := re.fullmatch(
             r"(?:at\s+)?(\d{1,2})(?::(\d{2}))?\s*(am|pm)?",
             expression,
         ):
             return self._provide_exact_time(match)
-        
-        time_struct, parse_status = self.cal.parse(
-                expression, self.reference)
 
+        time_struct, parse_status = self.cal.parse(expression, self.reference)
 
         if isinstance(parse_status, int) and parse_status > 0:
             result = datetime(*time_struct[:6])
@@ -80,7 +76,7 @@ class TimeResolver:
 
         return self._to_utc(self.reference + delta)
 
-    def _before_time_handle(self,match):
+    def _before_time_handle(self, match):
 
         if match:
             hour = int(match.group(1))
@@ -105,9 +101,8 @@ class TimeResolver:
             target -= timedelta(minutes=30)
 
             return self._to_utc(target)
-        
-        
-    def _provide_exact_time(self,match):
+
+    def _provide_exact_time(self, match):
 
         hour = int(match.group(1))
         minute = int(match.group(2) or 0)
@@ -134,5 +129,3 @@ class TimeResolver:
             target += timedelta(days=1)
 
         return self._to_utc(target)
-    
-    

@@ -1,11 +1,10 @@
 from collections import deque
 from uuid import UUID
 
-from fastapi import HTTPException
-from sqlalchemy.orm import Session
-
 from app.models import Task, TaskDependency
 from app.services.task_service import TaskService
+from fastapi import HTTPException
+from sqlalchemy.orm import Session
 
 
 class DependencyServices:
@@ -33,7 +32,11 @@ class DependencyServices:
         user_id: UUID,
         task_id: UUID,
         depends_on_id: UUID,
+        commit: bool = True,
     ) -> TaskDependency:
+        TaskService.get_task(db, user_id, task_id)
+        TaskService.get_task(db, user_id, depends_on_id)
+
         if task_id == depends_on_id:
             raise HTTPException(
                 status_code=400, detail="A task cannot depend on itself."
@@ -60,23 +63,24 @@ class DependencyServices:
             depends_on_id=depends_on_id,
         )
         db.add(dependency)
-        db.commit()
-        db.refresh(dependency)
+
+        if commit:
+            db.commit()
+            db.refresh(dependency)
+        else:
+            db.flush()
+
         return dependency
 
     @staticmethod
     def get_task_dependency(db: Session, task_id: UUID, user_id: UUID):
-        task = TaskService.get_task(db, user_id, task_id)
-        if task is None:
-            raise HTTPException(status_code=404, detail="Task not found")
-        return task.dependencies
+        return db.query(TaskDependency).filter(TaskDependency.task_id == task_id).all()
 
     @staticmethod
     def build_dependency_response(
         task: Task,
         chain: list[Task],
     ) -> dict:
-
         chain.reverse()
 
         chain_data = [
@@ -137,7 +141,7 @@ class DependencyServices:
         db: Session,
         task_id: UUID,
         user_id: UUID,
-    ):
+    ) -> dict:
         task = TaskService.get_task(db, user_id, task_id)
         chain = DependencyServices.get_dependency_chain(db, task_id)
 
@@ -146,9 +150,30 @@ class DependencyServices:
             chain,
         )
 
-        @staticmethod
-        def get_dependents(db: Session, task_id: UUID, user_id: UUID):
-            task = TaskService.get_task(db=db, user_id=user_id, task_id=task_id)
-            if task is None:
-                raise HTTPException(status_code=404, detail="Task not found")
-            return task.dependents
+    @staticmethod
+    def get_dependents(db: Session, task_id: UUID, user_id: UUID) -> list[Task]:
+        task = TaskService.get_task(db=db, user_id=user_id, task_id=task_id)
+        return task.dependents
+
+    @staticmethod
+    def remove_dependency(
+        db: Session,
+        task_id: UUID,
+        dependency_id: UUID,
+        user_id: UUID,
+    ) -> TaskDependency:
+        TaskService.get_task(db, user_id, task_id)
+        dependency = (
+            db.query(TaskDependency)
+            .filter(
+                TaskDependency.id == dependency_id,
+                TaskDependency.task_id == task_id,
+            )
+            .first()
+        )
+        if dependency is None:
+            raise HTTPException(status_code=404, detail="Dependency not found")
+
+        db.delete(dependency)
+        db.commit()
+        return dependency
