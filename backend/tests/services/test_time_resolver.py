@@ -125,3 +125,29 @@ def test_fallback_parsing():
 
     assert result is not None
     assert result == datetime(2026, 4, 14, 10, 30)
+    
+@pytest.mark.parametrize(
+    "expression",
+    [
+        pytest.param("adfgh", id="random-letters"),
+        pytest.param("not-a-time", id="non-time-text"),
+        pytest.param("hello world", id="unrelated-words"),
+        pytest.param("25:00", id="hour-out-of-range"),
+        pytest.param("12:75", id="minute-out-of-range"),
+        pytest.param("13 pm", id="12-hour-value-out-of-range"),
+        pytest.param("0 am", id="zero-hour-with-period"),
+    ],
+)
+def test_invalid_time_expressions_return_none(expression: str) -> None:
+
+    # Arrange
+    resolver = TimeResolver(
+        timezone="Asia/Kolkata",
+        reference_time=datetime(2026, 4, 13, 14, 0),
+    )
+
+    # Act
+    result = resolver.resolve(expression)
+
+    # Assert
+    assert result is None
