@@ -93,6 +93,7 @@ def test_resolve_before_time_expression(
     # Assert
     assert result == reference_time + delta
 
+
 def test_before_11():
     resolver = TimeResolver(
         timezone="Asia/Kolkata",
@@ -113,8 +114,8 @@ def test_at_3_pm():
     result = resolver.resolve("at 3 pm")
 
     assert result == datetime(2026, 4, 13, 9, 30)
-    
-    
+
+
 def test_fallback_parsing():
     resolver = TimeResolver(
         timezone="Asia/Kolkata",
@@ -125,7 +126,8 @@ def test_fallback_parsing():
 
     assert result is not None
     assert result == datetime(2026, 4, 14, 10, 30)
-    
+
+
 @pytest.mark.parametrize(
     "expression",
     [

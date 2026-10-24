@@ -20,8 +20,8 @@ class TaskCreate(BaseModel):
 
 
 class TaskUpdate(BaseModel):
-    title: str | None = Field(None, min_length=1, max_length=255)
-    description: str | None = None
+    title: str
+    description: str
 
     due_at: datetime | None = None
 

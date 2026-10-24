@@ -91,6 +91,7 @@ class TaskService:
         task = TaskService.get_task(db, user_id, task_id)
         if not task:
             raise HTTPException(status_code=404, detail="Task not found")
+
         task.title = data.title
         task.description = data.description
         task.status = data.status

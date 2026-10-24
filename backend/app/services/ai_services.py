@@ -21,6 +21,7 @@ class AIServices:
         self.model = model
 
     def createTaskFromRawInput(self, message) -> list[TaskCreate]:
+        print("got the message ", message)
         payload = self._build_payload(message)
 
         response = self._post_request(self.API_URL, payload)
@@ -48,6 +49,7 @@ class AIServices:
         }
 
     def _post_request(self, url: str, payload) -> dict:
+        print("ai request send")
         response = requests.post(
             url,
             json=payload,
