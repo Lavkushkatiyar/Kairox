@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Sparkles, Wand2, Mic, Image, ArrowRight, Clock, Layers, Copy, Check, CheckSquare } from 'lucide-react';
 import { Layout } from '../components/layout/Layout';
-import { PriorityBadge, StatusBadge, TypeBadge } from '../components/ui/Badge';
+import { PriorityBadge, TypeBadge } from '../components/ui/Badge';
 import { EmptyState } from '../components/ui/EmptyState';
 import { useThought } from '../hooks/useThought';
 import { typeIcons } from '../data/mockData';
@@ -16,6 +16,9 @@ export function Dashboard({ user, onLogout }) {
     setInput,
     isProcessing,
     isStructured,
+    isLoadingTasks,
+    processingMessage,
+    error,
     tasks,
     timeline,
     handleStructure,
@@ -55,6 +58,15 @@ export function Dashboard({ user, onLogout }) {
             <path d="M380 260 C 480 180, 580 320, 650 380" stroke="#0284c7" strokeWidth="1.2" strokeDasharray="4 4" opacity="0.2" />
           </svg>
         </div>
+
+        {error && (
+          <div
+            role="alert"
+            className="relative z-10 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-xs font-semibold text-red-600"
+          >
+            {error}
+          </div>
+        )}
 
         {/* VIEW 1: THOUGHT CAPTURE */}
         {activeView === 'capture' && (
@@ -116,6 +128,12 @@ export function Dashboard({ user, onLogout }) {
                 </button>
               </div>
             </div>
+
+            {isProcessing && (
+              <p className="text-xs font-medium text-slate-500" role="status">
+                {processingMessage}
+              </p>
+            )}
 
             {/* Bottom Action Pill Buttons */}
             <div className="flex items-center justify-center gap-3 pt-1">
@@ -180,7 +198,7 @@ export function Dashboard({ user, onLogout }) {
 
               {/* Filter Tabs */}
               <div className="flex items-center gap-1.5 p-1 neu-input-inset rounded-xl text-xs">
-                {['all', 'pending', 'in_progress', 'critical', 'done'].map((filterKey) => (
+                {['all', 'todo', 'in_progress', 'critical', 'done', 'cancelled'].map((filterKey) => (
                   <button
                     key={filterKey}
                     onClick={() => setTaskFilter(filterKey)}
@@ -199,8 +217,12 @@ export function Dashboard({ user, onLogout }) {
             {filteredTasks.length === 0 ? (
               <EmptyState
                 icon={<Layers size={24} className="text-sky-600" />}
-                title="No tasks match the filter"
-                description={tasks.length === 0 ? "You haven't structured any thoughts yet. Dump a thought to start." : "Try selecting a different filter above."}
+                title={isLoadingTasks ? 'Loading tasks...' : 'No tasks match the filter'}
+                description={isLoadingTasks
+                  ? 'Fetching your tasks from Kairox.'
+                  : tasks.length === 0
+                    ? "You haven't structured any thoughts yet. Dump a thought to start."
+                    : 'Try selecting a different filter above.'}
                 action={
                   tasks.length === 0 && (
                     <button onClick={() => setActiveView('capture')} className="neu-pill-btn text-xs px-3 py-1.5">
@@ -284,7 +306,8 @@ export function Dashboard({ user, onLogout }) {
 
 {/* Individual Task Card Component */}
 function TaskCard({ task, onUpdateStatus, onCopyDraft, copiedTaskId }) {
-  const icon = typeIcons[task.type] || '📌';
+  const taskType = task.task_type || task.type;
+  const icon = typeIcons[taskType] || '📌';
 
   return (
     <div className="neu-card-extruded p-4 space-y-3 text-left">
@@ -323,11 +346,11 @@ function TaskCard({ task, onUpdateStatus, onCopyDraft, copiedTaskId }) {
       <div className="flex items-center justify-between pt-1.5 border-t border-slate-200/60 flex-wrap gap-1.5 text-xs">
         <div className="flex items-center gap-1.5 flex-wrap">
           <PriorityBadge priority={task.priority} />
-          <TypeBadge type={task.type} />
-          {task.dueTime && (
+          <TypeBadge type={taskType} />
+          {(task.due_at || task.dueTime) && (
             <span className="inline-flex items-center gap-1 text-slate-500 text-[10px] font-medium">
               <Clock size={11} />
-              {task.dueTime}
+              {task.dueTime || new Date(task.due_at).toLocaleString()}
             </span>
           )}
         </div>
@@ -338,10 +361,10 @@ function TaskCard({ task, onUpdateStatus, onCopyDraft, copiedTaskId }) {
           onChange={(e) => onUpdateStatus(task.id, e.target.value)}
           className="bg-transparent border border-slate-300 rounded-md px-1.5 py-0.5 text-[11px] text-slate-700 font-semibold focus:outline-none focus:border-sky-600 cursor-pointer"
         >
-          <option value="pending">Pending</option>
+          <option value="todo">To Do</option>
           <option value="in_progress">In Progress</option>
-          <option value="scheduled">Scheduled</option>
           <option value="done">Done</option>
+          <option value="cancelled">Cancelled</option>
         </select>
       </div>
     </div>

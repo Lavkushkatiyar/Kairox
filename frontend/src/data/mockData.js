@@ -116,10 +116,10 @@ export const priorityConfig = {
 };
 
 export const statusConfig = {
-  pending: { label: 'Pending', color: 'text-slate-400', bg: 'bg-slate-500/15' },
+  todo: { label: 'To Do', color: 'text-slate-400', bg: 'bg-slate-500/15' },
   in_progress: { label: 'In Progress', color: 'text-indigo-400', bg: 'bg-indigo-500/15' },
-  scheduled: { label: 'Scheduled', color: 'text-violet-400', bg: 'bg-violet-500/15' },
   done: { label: 'Done', color: 'text-emerald-400', bg: 'bg-emerald-500/15' },
+  cancelled: { label: 'Cancelled', color: 'text-slate-400', bg: 'bg-slate-500/15' },
 };
 
 export const typeIcons = {
