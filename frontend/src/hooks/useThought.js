@@ -1,48 +1,88 @@
-import { useState, useCallback } from 'react';
-import { mockTasks, mockTimeline, mockThought } from '../data/mockData';
+import { useState, useCallback, useEffect } from 'react';
+import { mockTasks, mockThought } from '../data/mockData';
+import {
+  createTasksFromThought,
+  getTasks,
+  getTasksWithDependencies,
+  updateTask,
+} from '../api/taskService';
 
 export function useThought() {
   const [input, setInput] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [isStructured, setIsStructured] = useState(false);
+  const [isLoadingTasks, setIsLoadingTasks] = useState(true);
+  const [processingMessage, setProcessingMessage] = useState('');
+  const [error, setError] = useState('');
   const [tasks, setTasks] = useState([]);
   const [timeline, setTimeline] = useState([]);
 
-  const handleStructure = useCallback(() => {
-    if (!input.trim()) return;
-    setIsProcessing(true);
+  useEffect(() => {
+    let isActive = true;
 
-    // Simulate AI processing delay
-    setTimeout(() => {
-      setTasks(mockTasks);
-      setTimeline(mockTimeline);
-      setIsProcessing(false);
-      setIsStructured(true);
-    }, 2200);
-  }, [input]);
+    getTasks()
+      .then((loadedTasks) => {
+        if (isActive) setTasks(loadedTasks);
+      })
+      .catch((loadError) => {
+        if (isActive) {
+          setError(loadError.response?.data?.detail || 'Could not load your tasks.');
+        }
+      })
+      .finally(() => {
+        if (isActive) setIsLoadingTasks(false);
+      });
+
+    return () => {
+      isActive = false;
+    };
+  }, []);
+
+  const handleStructure = useCallback(async () => {
+return setIsStructured(true)
+},[input])
 
   const handleReset = useCallback(() => {
     setInput('');
     setIsStructured(false);
-    setTasks([]);
     setTimeline([]);
+    setError('');
   }, []);
 
   const handleLoadDemo = useCallback(() => {
     setInput(mockThought);
   }, []);
 
-  const updateTaskStatus = useCallback((taskId, newStatus) => {
-    setTasks(prev =>
-      prev.map(t => t.id === taskId ? { ...t, status: newStatus } : t)
-    );
-  }, []);
+  const updateTaskStatus = useCallback(
+    async (taskId, newStatus) => {
+      const task = tasks.find((item) => item.id === taskId);
+      if (!task) return;
+
+      setError('');
+      try {
+        const updatedTask = await updateTask(task, newStatus);
+        setTasks((previousTasks) =>
+          previousTasks.map((item) =>
+            item.id === taskId ? { ...item, ...updatedTask } : item
+          )
+        );
+      } catch (updateError) {
+        setError(
+          updateError.response?.data?.detail || 'Could not update the task status.'
+        );
+      }
+    },
+    [tasks]
+  );
 
   return {
     input,
     setInput,
     isProcessing,
     isStructured,
+    isLoadingTasks,
+    processingMessage,
+    error,
     tasks,
     timeline,
     handleStructure,
