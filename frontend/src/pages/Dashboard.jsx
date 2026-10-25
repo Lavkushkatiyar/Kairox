@@ -3,6 +3,7 @@ import { Sparkles, Wand2, Mic, Image, ArrowRight, Clock, Layers, Copy, Check, Ch
 import { Layout } from '../components/layout/Layout';
 import { PriorityBadge, TypeBadge } from '../components/ui/Badge';
 import { EmptyState } from '../components/ui/EmptyState';
+import { TaskGraph } from '../components/task/TaskGraph';
 import { useThought } from '../hooks/useThought';
 import { typeIcons } from '../data/mockData';
 
@@ -47,7 +48,7 @@ export function Dashboard({ user, onLogout }) {
       user={user}
       onLogout={onLogout}
     >
-      <div className="max-w-4xl mx-auto space-y-6 py-2 relative">
+      <div className="relative mx-auto w-full space-y-6 py-2">
         {/* Background Network Node Accents */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden opacity-25 z-0">
           <svg className="w-full h-full" viewBox="0 0 800 600" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -116,7 +117,7 @@ export function Dashboard({ user, onLogout }) {
                 >
                   {isProcessing ? (
                     <>
-                      <Wand2 size={16} className="animate-spin text-sky-600" />
+                      <Wand2 size={16} className="animate-spin text-emerald-600" />
                       <span>Structuring...</span>
                     </>
                   ) : (
@@ -130,7 +131,7 @@ export function Dashboard({ user, onLogout }) {
             </div>
 
             {isProcessing && (
-              <p className="text-xs font-medium text-slate-500" role="status">
+              <p className="text-xs font-semibold text-emerald-600" role="status">
                 {processingMessage}
               </p>
             )}
@@ -156,7 +157,7 @@ export function Dashboard({ user, onLogout }) {
 
             {/* Structured Results Display */}
             {isStructured && !isProcessing && (
-              <div className="w-full max-w-3xl pt-6 space-y-4 animate-slide-up">
+              <div className="w-full pt-6 space-y-4 animate-slide-up">
                 <div className="flex items-center justify-between">
                   <h3 className="text-base font-bold text-slate-800 flex items-center gap-2">
                     <CheckSquare size={18} className="text-sky-600" />
@@ -171,17 +172,11 @@ export function Dashboard({ user, onLogout }) {
                   </button>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  {tasks.map((task) => (
-                    <TaskCard
-                      key={task.id}
-                      task={task}
-                      onUpdateStatus={updateTaskStatus}
-                      onCopyDraft={handleCopyDraft}
-                      copiedTaskId={copiedTaskId}
-                    />
-                  ))}
-                </div>
+                <TaskGraph
+                  tasks={tasks}
+                  thought={input}
+                  onUpdateStatus={updateTaskStatus}
+                />
               </div>
             )}
           </div>

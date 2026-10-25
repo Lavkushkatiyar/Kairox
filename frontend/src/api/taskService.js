@@ -10,6 +10,11 @@ export async function getTasks() {
   return response.data;
 }
 
+export async function getTaskDependencies(taskId) {
+  const response = await apiClient.get(`/task/${taskId}/dependencies`);
+  return response.data;
+}
+
 export async function createTasksFromThought(text, onStatusChange) {
   const inputResponse = await apiClient.post('/inputs', {
     text,
@@ -36,6 +41,18 @@ export async function createTasksFromThought(text, onStatusChange) {
 
   throw new Error(
     'Task processing is taking longer than expected. You can check your tasks again shortly.'
+  );
+}
+
+export async function getTasksWithDependencies(tasks) {
+  return Promise.all(
+    tasks.map(async (task) => {
+      const dependencies = await getTaskDependencies(task.id);
+      return {
+        ...task,
+        depends_on_ids: dependencies.map((dependency) => dependency.depends_on_id),
+      };
+    })
   );
 }
 

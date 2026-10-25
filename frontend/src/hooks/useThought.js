@@ -1,8 +1,9 @@
 import { useState, useCallback, useEffect } from 'react';
-import { mockThought } from '../data/mockData';
+import { mockTasks, mockThought } from '../data/mockData';
 import {
   createTasksFromThought,
   getTasks,
+  getTasksWithDependencies,
   updateTask,
 } from '../api/taskService';
 
@@ -38,40 +39,8 @@ export function useThought() {
   }, []);
 
   const handleStructure = useCallback(async () => {
-    if (!input.trim()) return;
-    return "will imlement soon "
-    // setError('');
-    // setIsProcessing(true);
-    // setProcessingMessage('Sending your thought...');
-
-    // try {
-    //   const createdTasks = await createTasksFromThought(input, (status) => {
-    //     setProcessingMessage(
-    //       status === 'processing'
-    //         ? 'Organizing your thought into tasks...'
-    //         : 'Your thought is queued. Waiting for the task processor...'
-    //     );
-    //   });
-    //   setTasks((existingTasks) => {
-    //     const createdTaskIds = new Set(createdTasks.map((task) => task.id));
-    //     return [
-    //       ...createdTasks,
-    //       ...existingTasks.filter((task) => !createdTaskIds.has(task.id)),
-    //     ];
-    //   });
-    //   setTimeline([]);
-    //   setIsStructured(true);
-    // } catch (processingError) {
-    //   setError(
-    //     processingError.response?.data?.detail ||
-    //       processingError.message ||
-    //       'Could not process your thought.'
-    //   );
-    // } finally {
-    //   setIsProcessing(false);
-    //   setProcessingMessage('');
-    // }
-  }, [input]);
+return setIsStructured(true)
+},[input])
 
   const handleReset = useCallback(() => {
     setInput('');

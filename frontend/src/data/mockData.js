@@ -117,7 +117,7 @@ export const priorityConfig = {
 
 export const statusConfig = {
   todo: { label: 'To Do', color: 'text-slate-400', bg: 'bg-slate-500/15' },
-  in_progress: { label: 'In Progress', color: 'text-indigo-400', bg: 'bg-indigo-500/15' },
+  in_progress: { label: 'In Progress', color: 'text-emerald-600', bg: 'bg-emerald-500/15' },
   done: { label: 'Done', color: 'text-emerald-400', bg: 'bg-emerald-500/15' },
   cancelled: { label: 'Cancelled', color: 'text-slate-400', bg: 'bg-slate-500/15' },
 };
