@@ -40,9 +40,7 @@ export function Dashboard({ user, onLogout }) {
     <Layout
       activeView={activeView}
       onViewChange={setActiveView}
-      onCapture={() => setActiveView('capture')}
       taskCount={tasks.length}
-      isStructured={isStructured}
       user={user}
       onLogout={onLogout}
     >
