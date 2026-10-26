@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import {
   Sparkles,
   Wand2,
@@ -21,7 +22,13 @@ import { useThought } from '../hooks/useThought';
 import { typeIcons } from '../data/mockData';
 
 export function Dashboard({ user, onLogout }) {
-  const [activeView, setActiveView] = useState('capture');
+  const location = useLocation();
+  const navigate = useNavigate();
+  const activeView = location.pathname === '/tasks'
+    ? 'tasks'
+    : location.pathname === '/timeline'
+      ? 'timeline'
+      : 'capture';
   const [taskFilter, setTaskFilter] = useState('all');
   const [copiedTaskId, setCopiedTaskId] = useState(null);
 
@@ -55,7 +62,12 @@ export function Dashboard({ user, onLogout }) {
 
   const handleViewChange = (view) => {
     if (view === 'tasks') setTaskFilter('all');
-    setActiveView(view);
+    const pathByView = {
+      capture: '/',
+      tasks: '/tasks',
+      timeline: '/timeline',
+    };
+    navigate(pathByView[view] || '/');
   };
 
   return (
@@ -264,7 +276,7 @@ export function Dashboard({ user, onLogout }) {
                   : 'Try selecting a different filter above.'}
                 action={
                   tasks.length === 0 && (
-                    <button onClick={() => setActiveView('capture')} className="neu-pill-btn text-xs px-3 py-1.5">
+                    <button onClick={() => handleViewChange('capture')} className="neu-pill-btn text-xs px-3 py-1.5">
                       Go to Thought Capture
                     </button>
                   )
@@ -302,7 +314,7 @@ export function Dashboard({ user, onLogout }) {
                 title="Timeline empty"
                 description="Input your thoughts to generate a chronological timeline."
                 action={
-                  <button onClick={() => setActiveView('capture')} className="neu-pill-btn text-xs px-3 py-1.5">
+                  <button onClick={() => handleViewChange('capture')} className="neu-pill-btn text-xs px-3 py-1.5">
                     Go to Thought Capture
                   </button>
                 }
