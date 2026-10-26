@@ -13,7 +13,6 @@ export function useThought() {
   const [processingMessage, setProcessingMessage] = useState('');
   const [error, setError] = useState('');
   const [tasks, setTasks] = useState([]);
-  const [timeline, setTimeline] = useState([]);
   const isSubmitting = useRef(false);
 
   const handleStructure = useCallback(async () => {
@@ -25,7 +24,6 @@ export function useThought() {
     setIsStructured(false);
     setStructuredThought('');
     setTasks([]);
-    setTimeline([]);
     setError('');
     setProcessingMessage('Submitting your thought...');
 
@@ -54,7 +52,6 @@ export function useThought() {
     setStructuredThought('');
     setTasks([]);
     setIsStructured(false);
-    setTimeline([]);
     setError('');
   }, []);
 
@@ -93,7 +90,6 @@ export function useThought() {
     processingMessage,
     error,
     tasks,
-    timeline,
     handleStructure,
     handleReset,
     handleLoadDemo,

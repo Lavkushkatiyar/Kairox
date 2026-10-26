@@ -64,12 +64,7 @@ const Login = ({ onSwitchToRegister }) => {
 
           {/* Password */}
           <div className="form-group" style={{ marginBottom: '28px' }}>
-            <div className="form-label-row">
-              <label className="form-label">Password</label>
-              <a href="#forgot" className="forgot-link" onClick={(e) => { e.preventDefault(); alert('Password reset flow coming soon!'); }}>
-                Forgot?
-              </a>
-            </div>
+            <label className="form-label">Password</label>
             <div className="neu-input-wrapper">
               <span className="input-icon">
                 <Lock size={18} />

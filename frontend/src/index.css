@@ -243,17 +243,6 @@
     color: var(--text-muted);
   }
 
-  .forgot-link {
-    font-size: 0.78rem;
-    font-weight: 600;
-    color: var(--primary-blue);
-    text-decoration: none;
-  }
-
-  .forgot-link:hover {
-    text-decoration: underline;
-  }
-
   .neu-input-wrapper {
     background: var(--bg-color);
     box-shadow: var(--shadow-inset);
