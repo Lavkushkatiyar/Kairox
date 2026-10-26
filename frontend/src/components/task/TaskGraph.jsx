@@ -1,13 +1,21 @@
 import { useMemo } from 'react';
-import { Check, Clock3, Circle, ListChecks } from 'lucide-react';
+import {
+  ArrowDownRight,
+  Check,
+  Clock3,
+  Circle,
+  GitBranch,
+  ListChecks,
+  Sparkles,
+} from 'lucide-react';
 import { PriorityBadge } from '../ui/Badge';
 import { statusConfig } from '../../data/mockData';
 
 const NODE_WIDTH = 248;
-const NODE_HEIGHT = 170;
+const NODE_HEIGHT = 220;
 const COLUMN_GAP = 310;
-const ROW_GAP = 210;
-const EDGE_GAP = 110;
+const ROW_GAP = 260;
+const EDGE_GAP = NODE_WIDTH / 2 + 24;
 
 function getTaskLayout(tasks) {
   const taskById = new Map(tasks.map((task) => [task.id, task]));
@@ -107,14 +115,39 @@ export function TaskGraph({ tasks, thought, onUpdateStatus }) {
 
   return (
     <section className="w-full space-y-4" aria-label="Task dependency graph">
-      <div className="flex flex-wrap items-center justify-between gap-3">
+      {thought && (
+        <div className="relative overflow-hidden rounded-2xl border border-sky-100 bg-gradient-to-r from-white/90 via-sky-50/80 to-emerald-50/70 px-4 py-4 shadow-[0_8px_24px_rgba(148,163,184,0.14)] sm:px-5">
+          <div className="absolute inset-y-0 left-0 w-1 bg-gradient-to-b from-sky-500 to-emerald-400" />
+          <div className="flex flex-wrap items-start justify-between gap-3 pl-1">
+            <div className="flex min-w-0 flex-1 items-start gap-3">
+              <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white text-sky-600 shadow-sm">
+                <Sparkles size={16} />
+              </span>
+              <div className="min-w-0">
+                <p className="text-[9px] font-extrabold uppercase tracking-[0.16em] text-slate-400">
+                  Original thought / prompt
+                </p>
+                <p className="mt-1 text-xs font-semibold italic leading-relaxed text-slate-700 sm:text-sm">
+                  “{thought}”
+                </p>
+              </div>
+            </div>
+            <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-emerald-100 bg-white/80 px-3 py-1.5 text-[10px] font-bold text-emerald-700 shadow-sm">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+              Parsed · {tasks.length} {tasks.length === 1 ? 'task' : 'tasks'}
+            </span>
+          </div>
+        </div>
+      )}
+
+      <div className="flex flex-wrap items-center justify-between gap-3 px-1">
         <div>
           <h3 className="flex items-center gap-2 text-base font-bold text-slate-800">
             <ListChecks size={18} className="text-sky-600" />
-            Execution graph
+            Your execution plan
           </h3>
           <p className="mt-1 text-xs font-medium text-slate-500">
-            Follow each task and its prerequisites through the plan.
+            Follow the sequence and see what each task depends on.
           </p>
         </div>
         <div className="flex items-center gap-3 text-[10px] font-semibold text-slate-500">
@@ -124,21 +157,10 @@ export function TaskGraph({ tasks, thought, onUpdateStatus }) {
           </span>
           <span className="inline-flex items-center gap-1.5">
             <span className="h-2 w-2 rounded-full bg-slate-300" />
-            To do
+            Scheduled / awaiting
           </span>
         </div>
       </div>
-
-      {thought && (
-        <div className="rounded-2xl border border-slate-200/70 bg-[var(--bg-color)] px-4 py-3 shadow-[inset_3px_3px_8px_#d1d9e6,inset_-3px_-3px_8px_#ffffff]">
-          <p className="text-[9px] font-bold uppercase tracking-wide text-slate-400">
-            Original thought
-          </p>
-          <p className="mt-1 text-xs italic leading-relaxed text-slate-600">
-            “{thought}”
-          </p>
-        </div>
-      )}
 
       <div className="w-full overflow-x-auto overflow-y-hidden rounded-2xl">
         <div
@@ -198,41 +220,59 @@ export function TaskGraph({ tasks, thought, onUpdateStatus }) {
           {tasks.map((task) => {
             const position = layout.positions.get(task.id);
             const dependencies = (task.depends_on_ids || [])
-              .map((id) => layout.taskById.get(id)?.title)
+              .map((id) => layout.taskById.get(id))
               .filter(Boolean);
             const status = statusConfig[task.status] || statusConfig.todo;
             const isExecuting = task.status === 'in_progress' || task.status === 'done';
+            const dependentCount = tasks.filter((candidate) =>
+              (candidate.depends_on_ids || []).includes(task.id)
+            ).length;
 
             return (
               <article
                 key={task.id}
-                className={`absolute -translate-y-1/2 rounded-2xl border bg-[var(--bg-color)] p-4 text-left shadow-[6px_6px_14px_#d1d9e6,-6px_-6px_14px_#ffffff] ${
-                  isExecuting ? 'border-emerald-300/80' : 'border-slate-200/70'
+                className={`absolute -translate-y-1/2 rounded-2xl border bg-[var(--bg-color)] p-4 text-left shadow-[7px_9px_18px_#d1d9e6,-7px_-7px_18px_#ffffff] transition duration-200 hover:scale-[1.015] hover:shadow-[9px_12px_22px_#cbd5e1,-8px_-8px_20px_#ffffff] ${
+                  isExecuting ? 'border-emerald-300/90' : 'border-slate-200/80'
                 }`}
                 style={{
-                  left: position.x,
+                  left: position.x - NODE_WIDTH / 2,
                   top: position.y,
                   width: NODE_WIDTH,
                 }}
               >
-                <div className="flex items-start justify-between gap-2">
-                  <div className="min-w-0">
-                    <span className="text-[9px] font-extrabold uppercase tracking-wide text-sky-600">
-                      Task {String(tasks.indexOf(task) + 1).padStart(2, '0')}
-                      {dependencies.length
-                        ? ' · Sequential'
-                        : ' · Parallel branch'}
-                    </span>
-                    <h4 className="mt-1 text-sm font-bold leading-snug text-slate-800">
-                      {task.title}
-                    </h4>
-                  </div>
+                <div className="mb-3 flex items-start justify-between gap-2">
+                  <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${
+                    isExecuting ? 'bg-emerald-50 text-emerald-600' : 'bg-white text-sky-600'
+                  } shadow-sm`}>
+                    {dependencies.length ? <ArrowDownRight size={17} /> : <GitBranch size={16} />}
+                  </span>
                   <span
                     className={`inline-flex shrink-0 items-center gap-1 rounded-full px-2 py-1 text-[9px] font-bold ${status.color} ${status.bg}`}
                   >
                     {isExecuting ? <Check size={10} /> : <Circle size={9} />}
                     {status.label}
                   </span>
+                </div>
+
+                <div className="min-w-0">
+                  <div className="flex flex-wrap items-center gap-x-1.5 gap-y-1">
+                    <span className={`text-[9px] font-extrabold uppercase tracking-wide ${
+                      isExecuting ? 'text-emerald-600' : 'text-sky-600'
+                    }`}>
+                      Task {String(tasks.indexOf(task) + 1).padStart(2, '0')}
+                      {dependencies.length ? ' · Sequential' : ' · Prerequisite'}
+                    </span>
+                    {dependencies.length > 0 && (
+                      <span className="text-[9px] text-slate-400">
+                        Depends on {dependencies.map((dependency) =>
+                          `#${String(tasks.indexOf(dependency) + 1).padStart(2, '0')}`
+                        ).join(', ')}
+                      </span>
+                    )}
+                  </div>
+                  <h4 className="mt-1 text-sm font-bold leading-snug text-slate-800">
+                    {task.title}
+                  </h4>
                 </div>
 
                 {task.description && (
@@ -246,10 +286,17 @@ export function TaskGraph({ tasks, thought, onUpdateStatus }) {
                     <Clock3 size={11} className="shrink-0 text-sky-600" />
                     <span>{formatDueTime(task.due_at)}</span>
                   </div>
-                  <div className="flex items-start gap-1.5 text-[10px] text-slate-500">
-                    <span className="shrink-0 font-bold text-slate-400">Depends on:</span>
-                    <span className="min-w-0 truncate">
-                      {dependencies.length ? dependencies.join(', ') : 'None'}
+                  <div className="flex items-start gap-1.5 text-[10px] leading-relaxed text-slate-500">
+                    <GitBranch size={12} className="mt-0.5 shrink-0 text-slate-400" />
+                    <span className="min-w-0">
+                      {dependencies.length
+                        ? <>Depends on <span className="font-semibold text-slate-700">{dependencies.map(({ title }) => title).join(', ')}</span></>
+                        : 'No prerequisites'}
+                      {dependentCount > 0 && (
+                        <span className="block text-slate-400">
+                          Unlocks {dependentCount} {dependentCount === 1 ? 'task' : 'tasks'}
+                        </span>
+                      )}
                     </span>
                   </div>
                   <div className="flex items-center justify-between gap-2">

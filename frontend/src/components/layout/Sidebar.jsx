@@ -1,8 +1,8 @@
+import { createElement } from 'react';
 import {
   Share2,
   LayoutGrid,
   History,
-  Settings,
 } from 'lucide-react';
 
 const navItems = [
@@ -13,10 +13,9 @@ const navItems = [
 
 export function Sidebar({ activeView, onViewChange, taskCount }) {
   return (
-    <aside className="w-12 py-4 px-1.5 flex flex-col items-center justify-between neu-floating-bar h-[360px] shrink-0 z-20 mt-3 ml-2">
-      {/* Top Nav items */}
-      <nav className="flex flex-col items-center gap-4 w-full">
-        {navItems.map(({ id, icon: Icon, label }) => {
+    <aside className="neu-floating-bar z-20 ml-2 mt-3 h-fit w-12 shrink-0 rounded-2xl px-1.5 py-4">
+      <nav aria-label="Main navigation" className="flex w-full flex-col items-center gap-4">
+        {navItems.map(({ id, icon, label }) => {
           const isActive = activeView === id;
           return (
             <button
@@ -33,7 +32,7 @@ export function Sidebar({ activeView, onViewChange, taskCount }) {
                 }
               `}
             >
-              <Icon size={18} strokeWidth={isActive ? 2.2 : 1.8} />
+              {createElement(icon, { size: 18, strokeWidth: isActive ? 2.2 : 1.8 })}
 
               {/* Task count badge */}
               {id === 'tasks' && taskCount > 0 && (
@@ -45,16 +44,6 @@ export function Sidebar({ activeView, onViewChange, taskCount }) {
           );
         })}
       </nav>
-
-      {/* Bottom Settings Button */}
-      <button
-        id="nav-settings"
-        title="Settings"
-        onClick={() => alert('Settings coming soon!')}
-        className="w-9 h-9 rounded-xl flex items-center justify-center neu-icon-idle hover:text-sky-600 focus:outline-none"
-      >
-        <Settings size={18} strokeWidth={1.8} />
-      </button>
     </aside>
   );
 }

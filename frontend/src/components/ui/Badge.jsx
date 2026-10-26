@@ -1,19 +1,10 @@
-import { priorityConfig, statusConfig } from '../../data/mockData';
+import { priorityConfig } from '../../data/mockData';
 
 export function PriorityBadge({ priority }) {
   const cfg = priorityConfig[priority] || priorityConfig.medium;
   return (
     <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-600 border ${cfg.color} ${cfg.bg} ${cfg.border}`}>
       <span className={`w-1.5 h-1.5 rounded-full ${cfg.dot}`} />
-      {cfg.label}
-    </span>
-  );
-}
-
-export function StatusBadge({ status }) {
-  const cfg = statusConfig[status] || statusConfig.pending;
-  return (
-    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${cfg.color} ${cfg.bg}`}>
       {cfg.label}
     </span>
   );
