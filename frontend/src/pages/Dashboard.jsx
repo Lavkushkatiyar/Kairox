@@ -1,5 +1,18 @@
 import { useState } from 'react';
-import { Sparkles, Wand2, Mic, Image, ArrowRight, Clock, Layers, Copy, Check, CheckSquare } from 'lucide-react';
+import {
+  Sparkles,
+  Wand2,
+  Mic,
+  Image,
+  ArrowRight,
+  Clock,
+  Layers,
+  Copy,
+  Check,
+  CheckSquare,
+  GitBranch,
+  MessageSquareText,
+} from 'lucide-react';
 import { Layout } from '../components/layout/Layout';
 import { PriorityBadge, TypeBadge } from '../components/ui/Badge';
 import { EmptyState } from '../components/ui/EmptyState';
@@ -40,10 +53,15 @@ export function Dashboard({ user, onLogout }) {
     return task.status === taskFilter;
   });
 
+  const handleViewChange = (view) => {
+    if (view === 'tasks') setTaskFilter('all');
+    setActiveView(view);
+  };
+
   return (
     <Layout
       activeView={activeView}
-      onViewChange={setActiveView}
+      onViewChange={handleViewChange}
       taskCount={tasks.length}
       user={user}
       onLogout={onLogout}
@@ -162,10 +180,10 @@ export function Dashboard({ user, onLogout }) {
                 <div className="flex items-center justify-between">
                   <h3 className="text-base font-bold text-slate-800 flex items-center gap-2">
                     <CheckSquare size={18} className="text-sky-600" />
-                    Structured Execution Plan ({tasks.length} Tasks)
+                    Structured Execution Plan
                   </h3>
                   <button
-                    onClick={() => setActiveView('tasks')}
+                    onClick={() => handleViewChange('tasks')}
                     className="neu-pill-btn text-xs px-3 py-1.5"
                   >
                     <span>View All Tasks</span>
@@ -190,9 +208,7 @@ export function Dashboard({ user, onLogout }) {
               <div>
                 <h2 className="text-xl font-black text-slate-900">Structured Tasks</h2>
                 <p className="text-xs text-slate-500 font-medium mt-0.5">
-                  {structuredThought
-                    ? <>Tasks generated from: “{structuredThought}”</>
-                    : 'Structure a thought to generate tasks for it'}
+                  Tasks and prerequisites from your thought
                 </p>
               </div>
 
@@ -214,6 +230,31 @@ export function Dashboard({ user, onLogout }) {
               </div>
             </div>
 
+            {structuredThought && (
+              <section className="relative overflow-hidden rounded-2xl border border-sky-100 bg-gradient-to-r from-white/90 via-sky-50/80 to-emerald-50/70 px-4 py-4 shadow-[0_8px_24px_rgba(148,163,184,0.14)] sm:px-5">
+                <div className="absolute inset-y-0 left-0 w-1 bg-gradient-to-b from-sky-500 to-emerald-400" />
+                <div className="flex flex-wrap items-start justify-between gap-3 pl-1">
+                  <div className="flex min-w-0 flex-1 items-start gap-3">
+                    <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white text-sky-600 shadow-sm">
+                      <MessageSquareText size={16} />
+                    </span>
+                    <div className="min-w-0">
+                      <p className="text-[9px] font-extrabold uppercase tracking-[0.16em] text-slate-400">
+                        Tasks generated from this thought
+                      </p>
+                      <p className="mt-1 text-xs font-semibold italic leading-relaxed text-slate-700 sm:text-sm">
+                        “{structuredThought}”
+                      </p>
+                    </div>
+                  </div>
+                  <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-emerald-100 bg-white/80 px-3 py-1.5 text-[10px] font-bold text-emerald-700 shadow-sm">
+                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                    {tasks.length} {tasks.length === 1 ? 'task' : 'tasks'}
+                  </span>
+                </div>
+              </section>
+            )}
+
             {filteredTasks.length === 0 ? (
               <EmptyState
                 icon={<Layers size={24} className="text-sky-600" />}
@@ -230,11 +271,13 @@ export function Dashboard({ user, onLogout }) {
                 }
               />
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 gap-3 xl:grid-cols-2">
                 {filteredTasks.map((task) => (
                   <TaskCard
                     key={task.id}
                     task={task}
+                    allTasks={tasks}
+                    taskNumber={tasks.indexOf(task) + 1}
                     onUpdateStatus={updateTaskStatus}
                     onCopyDraft={handleCopyDraft}
                     copiedTaskId={copiedTaskId}
@@ -303,67 +346,129 @@ export function Dashboard({ user, onLogout }) {
 }
 
 {/* Individual Task Card Component */}
-function TaskCard({ task, onUpdateStatus, onCopyDraft, copiedTaskId }) {
+function TaskCard({
+  task,
+  allTasks = [],
+  taskNumber = 1,
+  onUpdateStatus,
+  onCopyDraft,
+  copiedTaskId,
+}) {
   const taskType = task.task_type || task.type;
   const icon = typeIcons[taskType] || '📌';
+  const dependencies = (task.depends_on_ids || [])
+    .map((dependencyId) => allTasks.find((item) => item.id === dependencyId))
+    .filter(Boolean);
+  const dependents = allTasks.filter((item) =>
+    (item.depends_on_ids || []).includes(task.id)
+  );
 
   return (
-    <div className="neu-card-extruded p-4 space-y-3 text-left">
-      <div className="flex items-start justify-between gap-2.5">
-        <div className="flex items-start gap-2">
-          <span className="text-base mt-0.5">{icon}</span>
-          <div>
-            <h4 className="text-xs sm:text-sm font-bold text-slate-800">
-              {task.title}
-            </h4>
-            <p className="text-[11px] text-slate-500 mt-0.5 leading-relaxed">{task.description}</p>
-          </div>
-        </div>
-      </div>
-
-      {/* Draft Message Action Box */}
-      {task.draft && (
-        <div className="p-2.5 neu-input-inset rounded-xl space-y-1.5 text-xs">
-          <div className="flex items-center justify-between text-slate-500 font-bold text-[11px]">
-            <span>Generated Draft</span>
-            <button
-              onClick={() => onCopyDraft(task.id, task.draft)}
-              className="flex items-center gap-1 text-sky-600 hover:underline cursor-pointer"
-            >
-              {copiedTaskId === task.id ? <Check size={11} /> : <Copy size={11} />}
-              <span>{copiedTaskId === task.id ? 'Copied' : 'Copy'}</span>
-            </button>
-          </div>
-          <p className="text-slate-700 font-mono whitespace-pre-wrap text-[10px] leading-tight">
-            {task.draft}
-          </p>
-        </div>
-      )}
-
-      {/* Metadata Badges */}
-      <div className="flex items-center justify-between pt-1.5 border-t border-slate-200/60 flex-wrap gap-1.5 text-xs">
-        <div className="flex items-center gap-1.5 flex-wrap">
-          <PriorityBadge priority={task.priority} />
-          <TypeBadge type={taskType} />
-          {(task.due_at || task.dueTime) && (
-            <span className="inline-flex items-center gap-1 text-slate-500 text-[10px] font-medium">
-              <Clock size={11} />
-              {task.dueTime || new Date(task.due_at).toLocaleString()}
+    <div className={`neu-card-extruded relative overflow-hidden p-4 text-left ${
+      task.status === 'in_progress' || task.status === 'done'
+        ? 'border border-emerald-200/80'
+        : 'border border-white/70'
+    }`}>
+      <div className={`absolute inset-y-0 left-0 w-1 ${
+        task.status === 'done'
+          ? 'bg-emerald-500'
+          : task.status === 'in_progress'
+            ? 'bg-sky-500'
+            : 'bg-slate-200'
+      }`} />
+      <div className="space-y-3 pl-1.5">
+        <div className="flex items-start justify-between gap-2.5">
+          <div className="flex min-w-0 items-start gap-2">
+            <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white text-base shadow-sm">
+              {icon}
             </span>
+            <div className="min-w-0">
+              <div className="mb-1 flex flex-wrap items-center gap-1.5">
+                <span className="text-[9px] font-extrabold uppercase tracking-wide text-sky-600">
+                  Task {String(taskNumber).padStart(2, '0')}
+                </span>
+                <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-[9px] font-semibold text-slate-500">
+                  {dependencies.length
+                    ? <GitBranch size={10} />
+                    : <span className="h-1.5 w-1.5 rounded-full bg-slate-300" />}
+                  {dependencies.length ? 'Sequential' : 'Prerequisite'}
+                </span>
+              </div>
+              <h4 className="text-xs font-bold text-slate-800 sm:text-sm">
+                {task.title}
+              </h4>
+              <p className="mt-0.5 text-[11px] leading-relaxed text-slate-500">
+                {task.description}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex flex-wrap gap-2">
+          <div className="flex min-w-0 flex-1 items-start gap-1.5 rounded-xl bg-white/70 px-2.5 py-2 text-[10px] leading-relaxed text-slate-500">
+            <GitBranch size={12} className="mt-0.5 shrink-0 text-sky-600" />
+            <span className="min-w-0">
+              <span className="font-bold text-slate-600">Depends on </span>
+              {dependencies.length
+                ? dependencies.map((dependency) => dependency.title).join(', ')
+                : 'No prerequisites'}
+            </span>
+          </div>
+          {dependents.length > 0 && (
+            <div className="flex min-w-0 flex-1 items-start gap-1.5 rounded-xl bg-white/70 px-2.5 py-2 text-[10px] leading-relaxed text-slate-500">
+              <ArrowRight size={12} className="mt-0.5 shrink-0 text-emerald-600" />
+              <span className="min-w-0">
+                <span className="font-bold text-slate-600">Unlocks </span>
+                {dependents.map((dependent) => dependent.title).join(', ')}
+              </span>
+            </div>
           )}
         </div>
 
-        {/* Status Selector */}
-        <select
-          value={task.status}
-          onChange={(e) => onUpdateStatus(task.id, e.target.value)}
-          className="bg-transparent border border-slate-300 rounded-md px-1.5 py-0.5 text-[11px] text-slate-700 font-semibold focus:outline-none focus:border-sky-600 cursor-pointer"
-        >
-          <option value="todo">To Do</option>
-          <option value="in_progress">In Progress</option>
-          <option value="done">Done</option>
-          <option value="cancelled">Cancelled</option>
-        </select>
+        {/* Draft Message Action Box */}
+        {task.draft && (
+          <div className="neu-input-inset space-y-1.5 rounded-xl p-2.5 text-xs">
+            <div className="flex items-center justify-between text-[11px] font-bold text-slate-500">
+              <span>Generated Draft</span>
+              <button
+                onClick={() => onCopyDraft(task.id, task.draft)}
+                className="flex cursor-pointer items-center gap-1 text-sky-600 hover:underline"
+              >
+                {copiedTaskId === task.id ? <Check size={11} /> : <Copy size={11} />}
+                <span>{copiedTaskId === task.id ? 'Copied' : 'Copy'}</span>
+              </button>
+            </div>
+            <p className="whitespace-pre-wrap font-mono text-[10px] leading-tight text-slate-700">
+              {task.draft}
+            </p>
+          </div>
+        )}
+
+        {/* Metadata Badges */}
+        <div className="flex flex-wrap items-center justify-between gap-1.5 border-t border-slate-200/60 pt-2 text-xs">
+          <div className="flex flex-wrap items-center gap-1.5">
+            <PriorityBadge priority={task.priority} />
+            <TypeBadge type={taskType} />
+            {(task.due_at || task.dueTime) && (
+              <span className="inline-flex items-center gap-1 text-[10px] font-medium text-slate-500">
+                <Clock size={11} />
+                {task.dueTime || new Date(task.due_at).toLocaleString()}
+              </span>
+            )}
+          </div>
+
+          {/* Status Selector */}
+          <select
+            value={task.status}
+            onChange={(e) => onUpdateStatus(task.id, e.target.value)}
+            className="cursor-pointer rounded-md border border-slate-300 bg-transparent px-1.5 py-0.5 text-[11px] font-semibold text-slate-700 focus:border-sky-600 focus:outline-none"
+          >
+            <option value="todo">To Do</option>
+            <option value="in_progress">In Progress</option>
+            <option value="done">Done</option>
+            <option value="cancelled">Cancelled</option>
+          </select>
+        </div>
       </div>
     </div>
   );
