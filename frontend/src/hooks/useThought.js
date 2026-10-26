@@ -1,49 +1,58 @@
-import { useState, useCallback, useEffect } from 'react';
-import { mockTasks, mockThought } from '../data/mockData';
+import { useState, useCallback, useRef } from 'react';
+import { mockThought } from '../data/mockData';
 import {
   createTasksFromThought,
-  getTasks,
-  getTasksWithDependencies,
   updateTask,
 } from '../api/taskService';
 
 export function useThought() {
   const [input, setInput] = useState('');
+  const [structuredThought, setStructuredThought] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [isStructured, setIsStructured] = useState(false);
-  const [isLoadingTasks, setIsLoadingTasks] = useState(true);
   const [processingMessage, setProcessingMessage] = useState('');
   const [error, setError] = useState('');
   const [tasks, setTasks] = useState([]);
   const [timeline, setTimeline] = useState([]);
-
-  useEffect(() => {
-    let isActive = true;
-
-    getTasks()
-      .then((loadedTasks) => {
-        if (isActive) setTasks(loadedTasks);
-      })
-      .catch((loadError) => {
-        if (isActive) {
-          setError(loadError.response?.data?.detail || 'Could not load your tasks.');
-        }
-      })
-      .finally(() => {
-        if (isActive) setIsLoadingTasks(false);
-      });
-
-    return () => {
-      isActive = false;
-    };
-  }, []);
+  const isSubmitting = useRef(false);
 
   const handleStructure = useCallback(async () => {
-return setIsStructured(true)
-},[input])
+    const thought = input;
+    if (!thought.trim() || isSubmitting.current) return;
+
+    isSubmitting.current = true;
+    setIsProcessing(true);
+    setIsStructured(false);
+    setStructuredThought('');
+    setTasks([]);
+    setTimeline([]);
+    setError('');
+    setProcessingMessage('Submitting your thought...');
+
+    try {
+      const generatedTasks = await createTasksFromThought(thought, (status) => {
+        setProcessingMessage(`Processing your thought... (${status})`);
+      });
+      setTasks(generatedTasks);
+      setStructuredThought(thought);
+      setIsStructured(true);
+    } catch (processingError) {
+      setError(
+        processingError.response?.data?.detail ||
+          processingError.message ||
+          'Could not structure your thought.'
+      );
+    } finally {
+      isSubmitting.current = false;
+      setIsProcessing(false);
+      setProcessingMessage('');
+    }
+  }, [input]);
 
   const handleReset = useCallback(() => {
     setInput('');
+    setStructuredThought('');
+    setTasks([]);
     setIsStructured(false);
     setTimeline([]);
     setError('');
@@ -78,9 +87,9 @@ return setIsStructured(true)
   return {
     input,
     setInput,
+    structuredThought,
     isProcessing,
     isStructured,
-    isLoadingTasks,
     processingMessage,
     error,
     tasks,

@@ -15,9 +15,9 @@ export function Dashboard({ user, onLogout }) {
   const {
     input,
     setInput,
+    structuredThought,
     isProcessing,
     isStructured,
-    isLoadingTasks,
     processingMessage,
     error,
     tasks,
@@ -104,6 +104,7 @@ export function Dashboard({ user, onLogout }) {
                 ) : (
                   <button
                     onClick={handleLoadDemo}
+                    disabled={isProcessing}
                     className="text-[11px] font-semibold text-sky-600 hover:underline cursor-pointer"
                   >
                     Load Sample Demo
@@ -174,7 +175,7 @@ export function Dashboard({ user, onLogout }) {
 
                 <TaskGraph
                   tasks={tasks}
-                  thought={input}
+                  thought={structuredThought}
                   onUpdateStatus={updateTaskStatus}
                 />
               </div>
@@ -188,7 +189,11 @@ export function Dashboard({ user, onLogout }) {
             <div className="flex items-center justify-between flex-wrap gap-3">
               <div>
                 <h2 className="text-xl font-black text-slate-900">Structured Tasks</h2>
-                <p className="text-xs text-slate-500 font-medium mt-0.5">Your extracted tasks, ready for execution</p>
+                <p className="text-xs text-slate-500 font-medium mt-0.5">
+                  {structuredThought
+                    ? <>Tasks generated from: “{structuredThought}”</>
+                    : 'Structure a thought to generate tasks for it'}
+                </p>
               </div>
 
               {/* Filter Tabs */}
@@ -212,12 +217,10 @@ export function Dashboard({ user, onLogout }) {
             {filteredTasks.length === 0 ? (
               <EmptyState
                 icon={<Layers size={24} className="text-sky-600" />}
-                title={isLoadingTasks ? 'Loading tasks...' : 'No tasks match the filter'}
-                description={isLoadingTasks
-                  ? 'Fetching your tasks from Kairox.'
-                  : tasks.length === 0
-                    ? "You haven't structured any thoughts yet. Dump a thought to start."
-                    : 'Try selecting a different filter above.'}
+                title="No tasks match the filter"
+                description={tasks.length === 0
+                  ? "You haven't structured any thoughts yet. Dump a thought to start."
+                  : 'Try selecting a different filter above.'}
                 action={
                   tasks.length === 0 && (
                     <button onClick={() => setActiveView('capture')} className="neu-pill-btn text-xs px-3 py-1.5">
