@@ -23,6 +23,24 @@ class RawInputService:
             .order_by(RawInput.created_at.desc())
             .all()
         )
+    @staticmethod
+    def delete_input(db: Session, user_id: UUID, input_id: UUID) -> dict:
+        raw_input = (
+            db.query(RawInput)
+            .filter(
+                RawInput.user_id == user_id,
+                RawInput.id == input_id,
+            )
+            .first()
+        )
+
+        if raw_input is None:
+            return {"message": "Record not found"}
+
+        db.delete(raw_input)
+        db.commit()
+
+        return {"message": "Record deleted"}
 
     @staticmethod
     def get_input_by_id(db: Session, user_id: UUID, input_id: UUID) -> RawInput:
@@ -31,3 +49,4 @@ class RawInputService:
             .filter(RawInput.user_id == user_id, RawInput.id == input_id)
             .first()
         )
+     

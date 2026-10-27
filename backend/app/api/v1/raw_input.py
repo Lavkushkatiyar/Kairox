@@ -75,3 +75,11 @@ def get_input_result(
         "tasks": [TaskRead.model_validate(task) for task in tasks],
         "processed_at": raw_input.processed_at,
     }
+
+
+@router.delete("/{input_id}")
+def delete_raw_input(input_id: UUID,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    return RawInputService.delete_input(db=db, input_id=input_id,user_id=current_user.id)
