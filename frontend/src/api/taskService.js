@@ -1,7 +1,8 @@
 import apiClient from './client';
 
-const POLL_INTERVAL_MS = 2000;
-const PROCESSING_TIMEOUT_MS = 180000;
+const INITIAL_POLL_INTERVAL_MS = 2000;
+const MAX_POLL_INTERVAL_MS = 10000;
+const PROCESSING_TIMEOUT_MS = 600000;
 
 const wait = (duration) => new Promise((resolve) => setTimeout(resolve, duration));
 
@@ -27,12 +28,16 @@ export async function createTasksFromThought(text, onStatusChange) {
   });
   const inputId = inputResponse.data.id;
   const deadline = Date.now() + PROCESSING_TIMEOUT_MS;
+  let pollInterval = INITIAL_POLL_INTERVAL_MS;
 
   while (Date.now() < deadline) {
     const resultResponse = await apiClient.get(`/inputs/${inputId}/result`);
     const result = resultResponse.data;
 
     if (result.status === 'completed') {
+      if (!Array.isArray(result.tasks)) {
+        throw new Error('Task processing completed without a task list.');
+      }
       return result.tasks;
     }
 
@@ -40,12 +45,17 @@ export async function createTasksFromThought(text, onStatusChange) {
       throw new Error(result.error || 'The thought could not be processed.');
     }
 
+    if (result.status !== 'pending' && result.status !== 'processing') {
+      throw new Error(`Unexpected task processing status: ${result.status}`);
+    }
+
     onStatusChange?.(result.status);
-    await wait(POLL_INTERVAL_MS);
+    await wait(Math.min(pollInterval, deadline - Date.now()));
+    pollInterval = Math.min(pollInterval * 1.5, MAX_POLL_INTERVAL_MS);
   }
 
   throw new Error(
-    'Task processing is taking longer than expected. You can check your tasks again shortly.'
+    'Task processing is still in progress. Your input is saved; check the Tasks page shortly.'
   );
 }
 
