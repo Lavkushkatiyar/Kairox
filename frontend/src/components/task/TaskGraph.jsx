@@ -1,112 +1,15 @@
-import { useMemo } from 'react';
+import { useId, useMemo } from 'react';
 import {
   ListChecks,
   Sparkles,
 } from 'lucide-react';
 import { TaskCard } from './TaskCard';
-
-const NODE_WIDTH = 278;
-const NODE_HEIGHT = 220;
-const COLUMN_GAP = 340;
-const ROW_GAP = 260;
-const EDGE_GAP = NODE_WIDTH / 2 + 24;
-
-function getTaskLayout(tasks) {
-  const taskById = new Map(tasks.map((task) => [task.id, task]));
-  const levels = new Map();
-
-  const getLevel = (task, visited = new Set()) => {
-    if (levels.has(task.id)) return levels.get(task.id);
-    if (visited.has(task.id)) return 0;
-
-    const nextVisited = new Set(visited).add(task.id);
-    const parents = (task.depends_on_ids || [])
-      .map((id) => taskById.get(id))
-      .filter(Boolean);
-    const level = parents.length
-      ? Math.max(...parents.map((parent) => getLevel(parent, nextVisited) + 1))
-      : 0;
-    levels.set(task.id, level);
-    return level;
-  };
-
-  tasks.forEach((task) => getLevel(task));
-
-  const maxLevel = Math.max(0, ...levels.values());
-  const hasDependencies = tasks.some((task) => (task.depends_on_ids || []).length);
-  const positionedLevels = new Map(
-    tasks.map((task, index) => {
-      if (!hasDependencies) {
-        const independentLevel = tasks.length === 1
-          ? 1
-          : tasks.length === 2
-            ? index * 2
-            : index % 3;
-        return [task.id, independentLevel];
-      }
-
-      const level = levels.get(task.id);
-      const hasDependents = tasks.some((candidate) =>
-        (candidate.depends_on_ids || []).includes(task.id)
-      );
-      const isIndependentLeaf = hasDependencies && level === 0 && !hasDependents;
-      return [task.id, isIndependentLeaf ? Math.min(1, maxLevel) : level];
-    })
-  );
-
-  const columns = new Map();
-  tasks.forEach((task) => {
-    const level = positionedLevels.get(task.id);
-    columns.set(level, [...(columns.get(level) || []), task]);
-  });
-
-  const maxColumn = Math.max(0, ...positionedLevels.values());
-  const width = Math.max(
-    760,
-    EDGE_GAP + maxColumn * COLUMN_GAP + NODE_WIDTH / 2 + 24
-  );
-  const tallestColumn = Math.max(1, ...[...columns.values()].map((items) => items.length));
-  const rowCount = Math.max(3, tallestColumn);
-  const height = Math.max(600, NODE_HEIGHT + (rowCount - 1) * ROW_GAP + 24);
-  const positions = new Map();
-
-  columns.forEach((columnTasks, level) => {
-    columnTasks.forEach((task, index) => {
-      const previousColumnBranches = (columns.get(level - 1)?.length || 0) > 1;
-      const row = columnTasks.length === 1
-        ? previousColumnBranches
-          ? 1
-          : [1, 0, 2, 0, 2, 1][level % 6]
-        : (rowCount - columnTasks.length) / 2 + index;
-
-      positions.set(task.id, {
-        x: EDGE_GAP + level * COLUMN_GAP,
-        y: NODE_HEIGHT / 2 + 12 + row * ROW_GAP,
-      });
-    });
-  });
-
-  const edges = [];
-  tasks.forEach((task) => {
-    (task.depends_on_ids || []).forEach((dependencyId) => {
-      const source = positions.get(dependencyId);
-      const target = positions.get(task.id);
-      if (source && target) {
-        edges.push({
-          id: `${dependencyId}-${task.id}`,
-          source,
-          target,
-          targetTaskId: task.id,
-        });
-      }
-    });
-  });
-
-  return { width, height, positions, edges, taskById };
-}
+import { getTaskLayout, taskGraphDimensions } from './taskGraphLayout';
 
 export function TaskGraph({ tasks, allTasks = tasks, thought, onUpdateStatus }) {
   const layout = useMemo(() => getTaskLayout(tasks), [tasks]);
+  const graphId = useId().replaceAll(':', '');
+  const { nodeWidth, nodeHeight } = taskGraphDimensions;
 
   if (!tasks.length) return null;
 
@@ -159,7 +62,7 @@ export function TaskGraph({ tasks, allTasks = tasks, thought, onUpdateStatus }) 
         </div>
       </div>
 
-      <div className="w-full overflow-x-auto overflow-y-hidden rounded-2xl">
+      <div className="w-full overflow-x-auto rounded-2xl pb-3">
         <div
           className="relative mx-auto"
           style={{ width: layout.width, height: layout.height }}
@@ -171,7 +74,7 @@ export function TaskGraph({ tasks, allTasks = tasks, thought, onUpdateStatus }) 
           >
             <defs>
               <marker
-                id="task-graph-arrow"
+                id={`${graphId}-task-graph-arrow`}
                 markerWidth="8"
                 markerHeight="8"
                 refX="6"
@@ -181,7 +84,7 @@ export function TaskGraph({ tasks, allTasks = tasks, thought, onUpdateStatus }) 
                 <path d="M0,0 L8,4 L0,8 z" fill="#94a3b8" />
               </marker>
               <marker
-                id="task-graph-arrow-active"
+                id={`${graphId}-task-graph-arrow-active`}
                 markerWidth="8"
                 markerHeight="8"
                 refX="6"
@@ -192,11 +95,11 @@ export function TaskGraph({ tasks, allTasks = tasks, thought, onUpdateStatus }) 
               </marker>
             </defs>
             {layout.edges.map(({ id, source, target, targetTaskId }) => {
-              const startX = source.x + NODE_WIDTH / 2;
+              const startX = source.x + nodeWidth / 2;
               const startY = source.y;
-              const endX = target.x - NODE_WIDTH / 2;
+              const endX = target.x - nodeWidth / 2 - 8;
               const endY = target.y;
-              const curve = Math.max(48, (endX - startX) * 0.45);
+              const curve = Math.max(16, (endX - startX) * 0.45);
               const targetTask = layout.taskById.get(targetTaskId);
               const isExecuting = targetTask?.status === 'in_progress' || targetTask?.status === 'done';
 
@@ -208,7 +111,7 @@ export function TaskGraph({ tasks, allTasks = tasks, thought, onUpdateStatus }) 
                   stroke={isExecuting ? '#10b981' : '#94a3b8'}
                   strokeOpacity={isExecuting ? '0.75' : '0.7'}
                   strokeWidth={isExecuting ? '2.5' : '2'}
-                  markerEnd={`url(#task-graph-arrow${isExecuting ? '-active' : ''})`}
+                  markerEnd={`url(#${graphId}-task-graph-arrow${isExecuting ? '-active' : ''})`}
                 />
               );
             })}
@@ -226,9 +129,10 @@ export function TaskGraph({ tasks, allTasks = tasks, thought, onUpdateStatus }) 
                 onUpdateStatus={onUpdateStatus}
                 className="absolute -translate-y-1/2"
                 style={{
-                  left: position.x - NODE_WIDTH / 2,
+                  left: position.x - nodeWidth / 2,
                   top: position.y,
-                  width: NODE_WIDTH,
+                  width: nodeWidth,
+                  minHeight: nodeHeight,
                 }}
               />
             );

@@ -114,7 +114,7 @@ export function TaskCard({
         <p className="text-[9px] font-extrabold uppercase tracking-wide text-slate-400">
           Task {String(taskNumber).padStart(2, '0')}
         </p>
-        <h3 className="mt-1 text-sm font-bold leading-snug text-slate-800">
+        <h3 className="mt-1 line-clamp-2 text-sm font-bold leading-snug text-slate-800">
           {task.title}
         </h3>
         {task.description && (
@@ -127,7 +127,10 @@ export function TaskCard({
       {dependencies.length > 0 && (
         <div className="mt-2 flex items-start gap-1.5 text-[10px] leading-relaxed text-slate-500">
           <GitBranch size={11} className="mt-0.5 shrink-0 text-slate-400" />
-          <p className="min-w-0 break-words">
+          <p
+            className="min-w-0 break-words line-clamp-2"
+            title={dependencies.map(({ title }) => title).join(', ')}
+          >
             <span className="font-semibold text-slate-600">Depends on: </span>
             {dependencies.map(({ title }) => title).join(', ')}
           </p>
