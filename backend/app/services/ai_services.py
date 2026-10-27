@@ -19,7 +19,7 @@ class AIServices:
         self.provider = provider
         self.model = model
 
-    def createTaskFromRawInput(self, message):
+    def createTaskFromRawInput(self, message):  
         print("got the message ", message)
         payload = self._build_payload(message)
 
@@ -34,6 +34,8 @@ class AIServices:
         message,
     ) -> dict:
         payload_message = get_prompted_message(message)
+        
+        
         return {
             "model": self.model,
             "messages": payload_message,
@@ -47,11 +49,21 @@ class AIServices:
             },
         }
 
+
     def _post_request(self, url: str, payload) -> dict:
         print("ai request send")
+
+        headers = {
+            "Content-Type": "application/json",
+        }
+
+        if self.provider == "openrouter":
+            headers["Authorization"] = f"Bearer {self.API_KEY.strip()}"
+
         response = requests.post(
             url,
             json=payload,
+            headers=headers,
             timeout=REQUEST_TIME_OUT,
         )
 
@@ -63,22 +75,30 @@ class AIServices:
         response.raise_for_status()
         return response.json()
 
+
     @staticmethod
     def _extract_content(
         result: dict,
         provider: str,
-    ) -> dict | None:
-        print(result)
-
+    ) -> dict:
         if provider == "ollama":
             output = result.get("message", {}).get("content")
-            return AI_TASK_FORMAT.model_validate_json(output).model_dump()
+        else:
+            choices = result.get("choices", [])
+            output = (
+                choices[0].get("message", {}).get("content")
+                if choices
+                else None
+            )
 
-        choices = result.get("choices", [])
-        output = choices[0].get("message", {}).get("content") if choices else None
-        output = AI_TASK_FORMAT.model_validate(output)
-        return output.model_dump()
+        if not output:
+            raise ValueError(
+                f"LLM returned empty content from provider: {provider}"
+            )
 
+        parsed_output = AI_TASK_FORMAT.model_validate_json(output)
+        return parsed_output.model_dump()
+    
     @staticmethod
     def _print_ollama_metrics(result: dict) -> None:
         duration_keys = (
