@@ -1,12 +1,11 @@
 from datetime import UTC, datetime
 from uuid import UUID
 
-from fastapi import HTTPException
-from sqlalchemy.orm import Session
-
 from app.models.task import Task, TaskStatus, TaskType
 from app.schemas.task import TaskCreate, TaskRead, TaskStats, TaskUpdate
 from app.services.time_resolver import TimeResolver
+from fastapi import HTTPException
+from sqlalchemy.orm import Session
 
 
 class TaskService:
@@ -128,6 +127,11 @@ class TaskService:
         db: Session, user_id: UUID, task_id: UUID, data: TaskUpdate
     ) -> TaskRead:
         task = TaskService.get_task(db, user_id, task_id)
+
+        if data.status == TaskStatus.DONE:
+            from app.services.dependency_service import DependencyServices
+
+            DependencyServices.ensure_prerequisites_complete(db, task.id)
 
         task.title = data.title
         task.description = data.description
