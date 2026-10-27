@@ -1,24 +1,12 @@
+import { createElement } from 'react';
 import {
   CalendarDays,
   CheckCircle2,
   Circle,
   Clock3,
-  FileText,
   GitBranch,
-  Mail,
-  MessageSquareText,
-  TerminalSquare,
 } from 'lucide-react';
-
-const taskTypeIcons = {
-  action: CheckCircle2,
-  communication: Mail,
-  document: FileText,
-  event: CalendarDays,
-  meeting: CalendarDays,
-  review: FileText,
-  technical: TerminalSquare,
-};
+import { getTaskIcon } from './taskIcons';
 
 const statusStyles = {
   todo: 'bg-slate-100 text-slate-500',
@@ -64,13 +52,16 @@ export function TaskCard({
   allTasks,
   taskNumber,
   onUpdateStatus,
+  onClick,
   className = '',
   style,
 }) {
   const dependencies = (task.depends_on_ids || [])
     .map((dependencyId) => allTasks.find((item) => item.id === dependencyId))
     .filter(Boolean);
-  const TaskIcon = taskTypeIcons[task.task_type || task.type] || MessageSquareText;
+  const taskIcon = createElement(getTaskIcon(task.task_type || task.type), {
+    size: 17,
+  });
   const status = task.status || 'todo';
   const statusStyle = statusStyles[status] || statusStyles.todo;
   const dueTime = formatDueTime(task);
@@ -87,10 +78,21 @@ export function TaskCard({
           : 'border-white/80'
       } ${className}`}
       style={style}
+      onClick={onClick}
+      onKeyDown={(event) => {
+        if (event.target !== event.currentTarget) return;
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          onClick?.();
+        }
+      }}
+      tabIndex={onClick ? 0 : undefined}
+      aria-haspopup={onClick ? 'dialog' : undefined}
+      aria-label={onClick ? `Open details for ${task.title}` : undefined}
     >
       <div className="flex items-center justify-between gap-3">
         <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white text-sky-600 shadow-sm">
-          <TaskIcon size={17} />
+          {taskIcon}
         </span>
         <label className={`relative inline-flex cursor-pointer items-center gap-1.5 rounded-full px-2.5 py-1 text-[9px] font-bold ${statusStyle}`}>
           {status === 'done' || status === 'in_progress'
@@ -101,6 +103,8 @@ export function TaskCard({
             aria-label={`Status for ${task.title}`}
             value={status}
             onChange={(event) => onUpdateStatus(task.id, event.target.value)}
+            onClick={(event) => event.stopPropagation()}
+            onKeyDown={(event) => event.stopPropagation()}
             className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
           >
             <option value="todo">To Do</option>

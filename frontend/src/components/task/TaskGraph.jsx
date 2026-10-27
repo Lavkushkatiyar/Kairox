@@ -1,13 +1,23 @@
-import { useId, useMemo, useState } from 'react';
+import { useCallback, useId, useMemo, useState } from 'react';
 import {
   ListChecks,
   Sparkles,
 } from 'lucide-react';
 import { TaskCard } from './TaskCard';
 import { getTaskLayout, taskGraphDimensions } from './taskGraphLayout';
+import { TaskDetailsModal } from './TaskDetailsModal';
 
-export function TaskGraph({ tasks, allTasks = tasks, thought, onUpdateStatus }) {
+export function TaskGraph({
+  tasks,
+  allTasks = tasks,
+  thought,
+  onUpdateStatus,
+  onUpdateTask,
+  onDeleteTask,
+  error,
+}) {
   const [showAllTasks, setShowAllTasks] = useState(false);
+  const [selectedTaskId, setSelectedTaskId] = useState(null);
   const visibleCount = showAllTasks ? tasks.length : Math.min(3, tasks.length);
   const layout = useMemo(
     () => getTaskLayout(tasks, visibleCount),
@@ -19,6 +29,9 @@ export function TaskGraph({ tasks, allTasks = tasks, thought, onUpdateStatus }) 
   const visibleTaskIds = new Set(visibleTasks.map((task) => task.id));
   const graphId = useId().replaceAll(':', '');
   const { nodeWidth, nodeHeight } = taskGraphDimensions;
+  const selectedTask = allTasks.find((task) => task.id === selectedTaskId);
+  const closeTaskDetails = useCallback(() => setSelectedTaskId(null), []);
+  const selectTask = useCallback((taskId) => setSelectedTaskId(taskId), []);
 
   if (!tasks.length) return null;
 
@@ -140,6 +153,7 @@ export function TaskGraph({ tasks, allTasks = tasks, thought, onUpdateStatus }) 
                 allTasks={allTasks}
                 taskNumber={allTasks.findIndex((item) => item.id === task.id) + 1}
                 onUpdateStatus={onUpdateStatus}
+                onClick={() => setSelectedTaskId(task.id)}
                 className="absolute -translate-y-1/2"
                 style={{
                   left: position.x - nodeWidth / 2,
@@ -160,6 +174,18 @@ export function TaskGraph({ tasks, allTasks = tasks, thought, onUpdateStatus }) 
         >
           {showAllTasks ? 'Show less' : `Show more · ${tasks.length - 3} tasks`}
         </button>
+      )}
+      {selectedTask && (
+        <TaskDetailsModal
+          task={selectedTask}
+          allTasks={allTasks}
+          taskNumber={allTasks.findIndex((item) => item.id === selectedTask.id) + 1}
+          onClose={closeTaskDetails}
+          onSelectTask={selectTask}
+          onUpdateTask={onUpdateTask}
+          onDeleteTask={onDeleteTask}
+          error={error}
+        />
       )}
     </section>
   );

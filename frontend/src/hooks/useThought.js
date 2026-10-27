@@ -2,6 +2,7 @@ import { useState, useCallback, useRef } from 'react';
 import { mockThought } from '../data/mockData';
 import {
   createTasksFromThought,
+  deleteTask,
   getRawInputs,
   getTasks,
   getTasksWithDependencies,
@@ -83,15 +84,15 @@ export function useThought() {
     setInput(mockThought);
   }, []);
 
-  const updateTaskStatus = useCallback(
-    async (taskId, newStatus) => {
+  const updateTaskDetails = useCallback(
+    async (taskId, updates) => {
       const task = tasks.find((item) => item.id === taskId)
         || allTasks.find((item) => item.id === taskId);
-      if (!task) return;
+      if (!task) return null;
 
       setError('');
       try {
-        const updatedTask = await updateTask(task, newStatus);
+        const updatedTask = await updateTask(task, updates);
         setTasks((previousTasks) =>
           previousTasks.map((item) =>
             item.id === taskId ? { ...item, ...updatedTask } : item
@@ -102,13 +103,42 @@ export function useThought() {
             item.id === taskId ? { ...item, ...updatedTask } : item
           )
         );
+        return updatedTask;
       } catch (updateError) {
         setError(
           updateError.response?.data?.detail || 'Could not update the task status.'
         );
+        return null;
       }
     },
     [allTasks, tasks]
+  );
+
+  const updateTaskStatus = useCallback(
+    (taskId, newStatus) => updateTaskDetails(taskId, { status: newStatus }),
+    [updateTaskDetails]
+  );
+
+  const removeTask = useCallback(
+    async (taskId) => {
+      setError('');
+      try {
+        await deleteTask(taskId);
+        const removeTaskAndDependency = (items) => items
+          .filter((item) => item.id !== taskId)
+          .map((item) => ({
+            ...item,
+            depends_on_ids: (item.depends_on_ids || []).filter((id) => id !== taskId),
+          }));
+        setTasks(removeTaskAndDependency);
+        setAllTasks(removeTaskAndDependency);
+        return true;
+      } catch (deleteError) {
+        setError(deleteError.response?.data?.detail || 'Could not delete the task.');
+        return false;
+      }
+    },
+    []
   );
 
   return {
@@ -128,5 +158,7 @@ export function useThought() {
     handleReset,
     handleLoadDemo,
     updateTaskStatus,
+    updateTaskDetails,
+    removeTask,
   };
 }

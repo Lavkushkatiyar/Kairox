@@ -39,6 +39,8 @@ export function Dashboard({ user, onLogout }) {
     handleReset,
     handleLoadDemo,
     updateTaskStatus,
+    updateTaskDetails,
+    removeTask,
   } = useThought();
 
   const handleViewChange = (view) => {
@@ -82,6 +84,9 @@ export function Dashboard({ user, onLogout }) {
             onReset={handleReset}
             onLoadDemo={handleLoadDemo}
             onUpdateStatus={updateTaskStatus}
+            onUpdateTask={updateTaskDetails}
+            onDeleteTask={removeTask}
+            error={error}
             onViewTasks={() => handleViewChange('tasks')}
           />
         )}
@@ -92,6 +97,9 @@ export function Dashboard({ user, onLogout }) {
             rawInputs={rawInputs}
             isLoading={isLoadingAllTasks}
             onUpdateStatus={updateTaskStatus}
+            onUpdateTask={updateTaskDetails}
+            onDeleteTask={removeTask}
+            error={error}
             onCapture={() => handleViewChange('capture')}
           />
         )}
