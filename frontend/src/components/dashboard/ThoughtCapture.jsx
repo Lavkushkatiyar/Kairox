@@ -18,6 +18,9 @@ export function ThoughtCapture({
   onReset,
   onLoadDemo,
   onUpdateStatus,
+  onUpdateTask,
+  onDeleteTask,
+  error,
   onViewTasks,
 }) {
   return (
@@ -113,6 +116,9 @@ export function ThoughtCapture({
             tasks={tasks}
             thought={structuredThought}
             onUpdateStatus={onUpdateStatus}
+            onUpdateTask={onUpdateTask}
+            onDeleteTask={onDeleteTask}
+            error={error}
           />
         </section>
       )}

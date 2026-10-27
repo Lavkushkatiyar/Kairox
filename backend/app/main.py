@@ -1,13 +1,12 @@
 from contextlib import asynccontextmanager
 
-from fastapi import Depends, FastAPI
-from fastapi.middleware.cors import CORSMiddleware
-from sqlalchemy.orm import Session
-
 from app.api.v1.router import router as api_router
 from app.cache.redis_client import close_redis, get_redis, init_redis
 from app.core.config import settings
 from app.db.session import get_db
+from fastapi import Depends, FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy.orm import Session
 
 
 @asynccontextmanager
@@ -44,9 +43,6 @@ def root():
 @app.get("/db-test")
 def db_test(db: Session = Depends(get_db)):
     return {"db": "connected"}
-
-
-print(settings.DATABASE_URL)
 
 
 @app.get("/health")

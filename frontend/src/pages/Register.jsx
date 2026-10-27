@@ -45,7 +45,7 @@ const Register = ({ onSwitchToLogin }) => {
       </div>
 
       {/* Neumorphic Card */}
-      <div className="neu-card">
+      <div className="neu-card register-card">
         <h2 className="card-title">Create Account</h2>
 
         {error && (

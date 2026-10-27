@@ -1,14 +1,38 @@
 from collections import deque
 from uuid import UUID
 
+from app.models import Task, TaskDependency
+from app.models.task import TaskStatus
+from app.services.task_service import TaskService
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
-from app.models import Task, TaskDependency
-from app.services.task_service import TaskService
-
 
 class DependencyServices:
+    @staticmethod
+    def ensure_prerequisites_complete(db: Session, task_id: UUID) -> None:
+        incomplete_prerequisites = (
+            db.query(Task)
+            .join(TaskDependency, TaskDependency.depends_on_id == Task.id)
+            .filter(
+                TaskDependency.task_id == task_id,
+                Task.status != TaskStatus.DONE,
+            )
+            .order_by(Task.title)
+            .all()
+        )
+        if incomplete_prerequisites:
+            prerequisite_titles = ", ".join(
+                prerequisite.title for prerequisite in incomplete_prerequisites
+            )
+            raise HTTPException(
+                status_code=409,
+                detail=(
+                    "Cannot complete this task until these prerequisites are "
+                    f"completed: {prerequisite_titles}."
+                ),
+            )
+
     @staticmethod
     def _would_create_cycle(db: Session, task_id: UUID, depends_on_id: UUID) -> bool:
         visited = set()

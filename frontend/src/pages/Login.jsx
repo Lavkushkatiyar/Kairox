@@ -33,7 +33,7 @@ const Login = ({ onSwitchToRegister }) => {
       </div>
 
       {/* Neumorphic Card */}
-      <div className="neu-card">
+      <div className="neu-card login-card">
         <h2 className="card-title">Sign In</h2>
 
         {error && (

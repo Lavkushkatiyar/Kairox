@@ -71,15 +71,25 @@ export async function getTasksWithDependencies(tasks) {
   );
 }
 
-export async function updateTask(task, status) {
+export async function updateTask(task, updates) {
   const response = await apiClient.patch(`/tasks/${task.id}`, {
-    title: task.title,
-    description: task.description || '',
-    status,
-    priority: task.priority,
-    task_type: task.task_type,
-    due_at: task.due_at,
+    title: updates.title ?? task.title,
+    description: updates.description ?? task.description ?? '',
+    status: updates.status ?? task.status,
+    priority: updates.priority ?? task.priority,
+    task_type: updates.task_type ?? task.task_type,
+    due_at: Object.hasOwn(updates, 'due_at') ? updates.due_at : task.due_at,
   });
 
+  return {
+    ...response.data,
+    due_at: response.data.due_at
+      ?? response.data.due_time
+      ?? (Object.hasOwn(updates, 'due_at') ? updates.due_at : task.due_at),
+  };
+}
+
+export async function deleteTask(taskId) {
+  const response = await apiClient.delete(`/tasks/${taskId}`);
   return response.data;
 }

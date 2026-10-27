@@ -11,6 +11,9 @@ export function StructuredTasks({
   rawInputs,
   isLoading,
   onUpdateStatus,
+  onUpdateTask,
+  onDeleteTask,
+  error,
   onCapture,
 }) {
   const [filter, setFilter] = useState('all');
@@ -111,6 +114,9 @@ export function StructuredTasks({
                       tasks={rawInput.filteredTasks}
                       allTasks={rawInput.tasks}
                       onUpdateStatus={onUpdateStatus}
+                      onUpdateTask={onUpdateTask}
+                      onDeleteTask={onDeleteTask}
+                      error={error}
                     />
                   ) : (
                     <p className="px-4 py-2 text-xs font-medium text-slate-400">
@@ -136,6 +142,9 @@ export function StructuredTasks({
                   tasks={unlinkedTasks}
                   allTasks={tasks.filter((task) => !task.input_id)}
                   onUpdateStatus={onUpdateStatus}
+                  onUpdateTask={onUpdateTask}
+                  onDeleteTask={onDeleteTask}
+                  error={error}
                 />
               )}
             </section>
