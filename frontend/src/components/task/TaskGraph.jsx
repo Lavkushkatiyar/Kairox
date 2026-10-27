@@ -1,4 +1,4 @@
-import { useId, useMemo } from 'react';
+import { useId, useMemo, useState } from 'react';
 import {
   ListChecks,
   Sparkles,
@@ -7,7 +7,16 @@ import { TaskCard } from './TaskCard';
 import { getTaskLayout, taskGraphDimensions } from './taskGraphLayout';
 
 export function TaskGraph({ tasks, allTasks = tasks, thought, onUpdateStatus }) {
-  const layout = useMemo(() => getTaskLayout(tasks), [tasks]);
+  const [showAllTasks, setShowAllTasks] = useState(false);
+  const visibleCount = showAllTasks ? tasks.length : Math.min(3, tasks.length);
+  const layout = useMemo(
+    () => getTaskLayout(tasks, visibleCount),
+    [tasks, visibleCount]
+  );
+  const visibleTasks = layout.orderedIds
+    .slice(0, visibleCount)
+    .map((taskId) => layout.taskById.get(taskId));
+  const visibleTaskIds = new Set(visibleTasks.map((task) => task.id));
   const graphId = useId().replaceAll(':', '');
   const { nodeWidth, nodeHeight } = taskGraphDimensions;
 
@@ -94,7 +103,11 @@ export function TaskGraph({ tasks, allTasks = tasks, thought, onUpdateStatus }) 
                 <path d="M0,0 L8,4 L0,8 z" fill="#10b981" />
               </marker>
             </defs>
-            {layout.edges.map(({ id, source, target, targetTaskId }) => {
+            {layout.edges
+              .filter(({ dependencyId, dependentId }) => {
+                return visibleTaskIds.has(dependencyId) && visibleTaskIds.has(dependentId);
+              })
+              .map(({ id, source, target, targetTaskId }) => {
               const startX = source.x + nodeWidth / 2;
               const startY = source.y;
               const endX = target.x - nodeWidth / 2 - 8;
@@ -117,7 +130,7 @@ export function TaskGraph({ tasks, allTasks = tasks, thought, onUpdateStatus }) 
             })}
           </svg>
 
-          {tasks.map((task) => {
+          {visibleTasks.map((task) => {
             const position = layout.positions.get(task.id);
 
             return (
@@ -139,6 +152,15 @@ export function TaskGraph({ tasks, allTasks = tasks, thought, onUpdateStatus }) 
           })}
         </div>
       </div>
+      {tasks.length > 3 && (
+        <button
+          type="button"
+          onClick={() => setShowAllTasks((shown) => !shown)}
+          className="neu-pill-btn mx-auto px-4 py-2 text-xs font-bold text-sky-600"
+        >
+          {showAllTasks ? 'Show less' : `Show more · ${tasks.length - 3} tasks`}
+        </button>
+      )}
     </section>
   );
 }

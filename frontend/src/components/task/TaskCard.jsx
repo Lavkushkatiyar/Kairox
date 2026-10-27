@@ -74,13 +74,14 @@ export function TaskCard({
   const status = task.status || 'todo';
   const statusStyle = statusStyles[status] || statusStyles.todo;
   const dueTime = formatDueTime(task);
-  const hoverStyle = className.includes('absolute')
+  const isPositionedNode = className.includes('absolute');
+  const hoverStyle = isPositionedNode
     ? 'hover:shadow-[9px_12px_22px_#cbd5e1,-8px_-8px_20px_#ffffff]'
     : 'hover:-translate-y-0.5 hover:shadow-[9px_12px_22px_#cbd5e1,-8px_-8px_20px_#ffffff]';
 
   return (
     <article
-      className={`relative rounded-2xl border bg-[var(--bg-color)] p-4 text-left shadow-[7px_9px_18px_#d1d9e6,-7px_-7px_18px_#ffffff] transition duration-200 ${hoverStyle} ${
+      className={`${isPositionedNode ? 'absolute' : 'relative'} rounded-2xl border bg-[var(--bg-color)] p-4 text-left shadow-[7px_9px_18px_#d1d9e6,-7px_-7px_18px_#ffffff] transition duration-200 ${hoverStyle} ${
         status === 'in_progress' || status === 'done'
           ? 'border-emerald-200/80'
           : 'border-white/80'
