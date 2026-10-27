@@ -1,8 +1,9 @@
 from datetime import UTC, datetime
 from uuid import UUID
 
-from app.models.reminder import ReminderStatus, ReminderType
 from pydantic import BaseModel, ConfigDict, field_validator
+
+from app.models.reminder import ReminderStatus, ReminderType
 
 
 def validate_future_datetime(value: datetime | None) -> datetime | None:

@@ -1,5 +1,8 @@
 from uuid import UUID
 
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.orm import Session
+
 from app.api.auth_dependencies import get_current_user
 from app.db.session import get_db
 from app.models.raw_input import InputStatus
@@ -9,8 +12,6 @@ from app.schemas.raw_input import RawInputCreate, RawInputResponse
 from app.schemas.task import TaskRead
 from app.services.raw_input_service import RawInputService
 from app.workers.tasks.process_input import process_rawInput
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
 
 router = APIRouter(prefix="/inputs", tags=["Raw Inputs"])
 

@@ -1,5 +1,6 @@
-from app.models.task import TaskPriority, TaskType
 from pydantic import BaseModel, Field
+
+from app.models.task import TaskPriority, TaskType
 
 
 class ExtractedTask(BaseModel):

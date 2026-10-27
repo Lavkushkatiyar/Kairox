@@ -1,13 +1,13 @@
 from uuid import UUID
 
+from fastapi import APIRouter, Depends
+from sqlalchemy.orm import Session
+
 from app.api.auth_dependencies import get_current_user
 from app.db.session import get_db
 from app.models.user import User
 from app.schemas.dependency import DependencyCreate, DependencyRead
-from app.schemas.task import TaskRead
 from app.services.dependency_service import DependencyServices
-from fastapi import APIRouter, Depends
-from sqlalchemy.orm import Session
 
 router = APIRouter(prefix="/task/{task_id}/dependencies", tags=["Dependencies"])
 
@@ -67,12 +67,12 @@ def get_dependency_chain(
     )
 
 
-@router.get("/dependents", response_model=list[TaskRead])
-def get_dependents(
-    task_id: UUID,
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db),
-):
-    return DependencyServices.get_dependents(
-        db=db, task_id=task_id, user_id=current_user.id
-    )
+# @router.get("/dependents", response_model=list[TaskRead])
+# def get_dependents(
+#     task_id: UUID,
+#     current_user: User = Depends(get_current_user),
+#     db: Session = Depends(get_db),
+# ):
+#     return DependencyServices.get_dependents(
+#         db=db, task_id=task_id, user_id=current_user.id
+#     )
