@@ -1,11 +1,12 @@
 from datetime import UTC, datetime
 from uuid import UUID
 
+from fastapi import HTTPException
+from sqlalchemy.orm import Session
+
 from app.models.task import Task, TaskStatus, TaskType
 from app.schemas.task import TaskCreate, TaskRead, TaskStats, TaskUpdate
 from app.services.time_resolver import TimeResolver
-from fastapi import HTTPException
-from sqlalchemy.orm import Session
 
 
 class TaskService:

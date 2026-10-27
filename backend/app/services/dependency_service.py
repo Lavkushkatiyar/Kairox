@@ -1,10 +1,11 @@
 from collections import deque
 from uuid import UUID
 
-from app.models import Task, TaskDependency
-from app.services.task_service import TaskService
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
+
+from app.models import Task, TaskDependency
+from app.services.task_service import TaskService
 
 
 class DependencyServices:
@@ -149,11 +150,6 @@ class DependencyServices:
             task,
             chain,
         )
-
-    @staticmethod
-    def get_dependents(db: Session, task_id: UUID, user_id: UUID) -> list[Task]:
-        task = TaskService.get_task(db=db, user_id=user_id, task_id=task_id)
-        return task.dependents
 
     @staticmethod
     def remove_dependency(

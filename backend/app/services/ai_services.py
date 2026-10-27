@@ -1,4 +1,5 @@
 import requests
+
 from app.schemas.ai_response import AI_TASK_FORMAT
 from llm.get_prompt_message import get_prompted_message
 

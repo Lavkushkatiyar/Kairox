@@ -1,3 +1,7 @@
+from fastapi import Depends
+from fastapi.security import OAuth2PasswordBearer
+from sqlalchemy.orm import Session
+
 from app.core.config import settings
 from app.db.session import get_db
 from app.models.user import User
@@ -9,26 +13,16 @@ from app.utils.security import (
     hash_password,
     verify_password,
 )
-from fastapi import Depends
-from fastapi.security import OAuth2PasswordBearer
-from sqlalchemy.orm import Session
 
 
 class AuthService:
     @staticmethod
     def register(db: Session, data: UserCreate):
-        print("Registering user")
-        print("data", data)
-        print("db", db)
         existing_user = db.query(User).filter(User.email == data.email).first()
         if existing_user:
             raise ValueError("User with this email already exists")
 
         hashed_password = hash_password(data.password)
-        print("existing_user", existing_user)
-        print("hashed_password", hashed_password)
-        print("data", data)
-
         user = User(
             email=data.email,
             hashed_password=hashed_password,
@@ -36,7 +30,6 @@ class AuthService:
             timezone="UTC",
             is_active=True,
         )
-        print("till here ")
         db.add(user)
         db.commit()
         db.refresh(user)
