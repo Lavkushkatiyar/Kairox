@@ -1,19 +1,13 @@
 import { useMemo } from 'react';
 import {
-  ArrowDownRight,
-  Check,
-  Clock3,
-  Circle,
-  GitBranch,
   ListChecks,
   Sparkles,
 } from 'lucide-react';
-import { PriorityBadge } from '../ui/Badge';
-import { statusConfig } from '../../data/mockData';
+import { TaskCard } from './TaskCard';
 
-const NODE_WIDTH = 248;
-const NODE_HEIGHT = 208;
-const COLUMN_GAP = 310;
+const NODE_WIDTH = 278;
+const NODE_HEIGHT = 220;
+const COLUMN_GAP = 340;
 const ROW_GAP = 260;
 const EDGE_GAP = NODE_WIDTH / 2 + 24;
 
@@ -41,7 +35,16 @@ function getTaskLayout(tasks) {
   const maxLevel = Math.max(0, ...levels.values());
   const hasDependencies = tasks.some((task) => (task.depends_on_ids || []).length);
   const positionedLevels = new Map(
-    tasks.map((task) => {
+    tasks.map((task, index) => {
+      if (!hasDependencies) {
+        const independentLevel = tasks.length === 1
+          ? 1
+          : tasks.length === 2
+            ? index * 2
+            : index % 3;
+        return [task.id, independentLevel];
+      }
+
       const level = levels.get(task.id);
       const hasDependents = tasks.some((candidate) =>
         (candidate.depends_on_ids || []).includes(task.id)
@@ -58,7 +61,10 @@ function getTaskLayout(tasks) {
   });
 
   const maxColumn = Math.max(0, ...positionedLevels.values());
-  const width = Math.max(760, 300 + maxColumn * COLUMN_GAP);
+  const width = Math.max(
+    760,
+    EDGE_GAP + maxColumn * COLUMN_GAP + NODE_WIDTH / 2 + 24
+  );
   const tallestColumn = Math.max(1, ...[...columns.values()].map((items) => items.length));
   const rowCount = Math.max(3, tallestColumn);
   const height = Math.max(600, NODE_HEIGHT + (rowCount - 1) * ROW_GAP + 24);
@@ -99,15 +105,7 @@ function getTaskLayout(tasks) {
   return { width, height, positions, edges, taskById };
 }
 
-function formatDueTime(value) {
-  if (!value) return 'No due time';
-  const date = new Date(value);
-  return Number.isNaN(date.getTime())
-    ? value
-    : date.toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' });
-}
-
-export function TaskGraph({ tasks, thought, onUpdateStatus }) {
+export function TaskGraph({ tasks, allTasks = tasks, thought, onUpdateStatus }) {
   const layout = useMemo(() => getTaskLayout(tasks), [tasks]);
 
   if (!tasks.length) return null;
@@ -218,98 +216,21 @@ export function TaskGraph({ tasks, thought, onUpdateStatus }) {
 
           {tasks.map((task) => {
             const position = layout.positions.get(task.id);
-            const dependencies = (task.depends_on_ids || [])
-              .map((id) => layout.taskById.get(id))
-              .filter(Boolean);
-            const status = statusConfig[task.status] || statusConfig.todo;
-            const isExecuting = task.status === 'in_progress' || task.status === 'done';
-            const dependentCount = tasks.filter((candidate) =>
-              (candidate.depends_on_ids || []).includes(task.id)
-            ).length;
 
             return (
-              <article
+              <TaskCard
                 key={task.id}
-                className={`absolute -translate-y-1/2 rounded-2xl border bg-[var(--bg-color)] p-4 text-left shadow-[7px_9px_18px_#d1d9e6,-7px_-7px_18px_#ffffff] transition duration-200 hover:scale-[1.015] hover:shadow-[9px_12px_22px_#cbd5e1,-8px_-8px_20px_#ffffff] ${
-                  isExecuting ? 'border-emerald-300/90' : 'border-slate-200/80'
-                }`}
+                task={task}
+                allTasks={allTasks}
+                taskNumber={allTasks.findIndex((item) => item.id === task.id) + 1}
+                onUpdateStatus={onUpdateStatus}
+                className="absolute -translate-y-1/2"
                 style={{
                   left: position.x - NODE_WIDTH / 2,
                   top: position.y,
                   width: NODE_WIDTH,
                 }}
-              >
-                <div className="mb-3 flex items-center justify-between gap-2">
-                  <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${
-                    isExecuting ? 'bg-emerald-50 text-emerald-600' : 'bg-white text-sky-600'
-                  } shadow-sm`}>
-                    {dependencies.length ? <ArrowDownRight size={17} /> : <GitBranch size={16} />}
-                  </span>
-                  <span
-                    className={`inline-flex shrink-0 items-center gap-1 rounded-full px-2 py-1 text-[9px] font-bold ${status.color} ${status.bg}`}
-                  >
-                    {isExecuting ? <Check size={10} /> : <Circle size={9} />}
-                    {status.label}
-                  </span>
-                </div>
-
-                <div className="min-w-0">
-                  <div className="flex flex-wrap items-center gap-x-1.5 gap-y-1">
-                    <span className={`text-[9px] font-extrabold uppercase tracking-wide ${
-                      isExecuting ? 'text-emerald-600' : 'text-sky-600'
-                    }`}>
-                      Task {String(tasks.indexOf(task) + 1).padStart(2, '0')}
-                      {dependencies.length ? ' · Sequential' : ' · Prerequisite'}
-                    </span>
-                    {dependencies.length > 0 && (
-                      <span className="text-[9px] text-slate-400">
-                        Depends on #{String(tasks.indexOf(dependencies[0]) + 1).padStart(2, '0')}
-                      </span>
-                    )}
-                  </div>
-                  <h4 className="mt-1 text-sm font-bold leading-snug text-slate-800">
-                    {task.title}
-                  </h4>
-                </div>
-
-                {task.description && (
-                  <p className="mt-2 line-clamp-2 text-[10px] leading-relaxed text-slate-500">
-                    {task.description}
-                  </p>
-                )}
-
-                <div className="mt-3 flex items-center justify-between gap-2 border-t border-slate-200/70 pt-2.5">
-                  <div className="min-w-0 space-y-1">
-                    <div className="flex items-center gap-1.5 text-[10px] text-slate-500">
-                      <Clock3 size={11} className="shrink-0 text-sky-600" />
-                      <span className="truncate">{formatDueTime(task.due_at)}</span>
-                    </div>
-                    <div className="flex items-center gap-1.5 text-[9px] text-slate-400">
-                      <GitBranch size={11} className="shrink-0" />
-                      <span>
-                        {dependencies.length
-                          ? `Depends on ${dependencies.map(({ title }) => title).join(', ')}`
-                          : 'No prerequisites'}
-                        {dependentCount > 0 && ` · Unlocks ${dependentCount}`}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="flex shrink-0 flex-col items-end gap-1.5">
-                    <PriorityBadge priority={task.priority} />
-                    <select
-                      aria-label={`Status for ${task.title}`}
-                      value={task.status}
-                      onChange={(event) => onUpdateStatus(task.id, event.target.value)}
-                      className="max-w-[112px] rounded-md border border-slate-300 bg-transparent px-1.5 py-1 text-[10px] font-semibold text-slate-700 focus:border-sky-600 focus:outline-none"
-                    >
-                      <option value="todo">To Do</option>
-                      <option value="in_progress">In Progress</option>
-                      <option value="done">Done</option>
-                      <option value="cancelled">Cancelled</option>
-                    </select>
-                  </div>
-                </div>
-              </article>
+              />
             );
           })}
         </div>

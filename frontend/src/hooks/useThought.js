@@ -55,7 +55,7 @@ export function useThought() {
       const generatedTasks = await createTasksFromThought(thought, (status) => {
         setProcessingMessage(`Processing your thought... (${status})`);
       });
-      setTasks(generatedTasks);
+      setTasks(await getTasksWithDependencies(generatedTasks));
       setStructuredThought(thought);
       setIsStructured(true);
     } catch (processingError) {
