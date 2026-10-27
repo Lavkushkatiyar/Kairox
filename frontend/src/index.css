@@ -216,6 +216,16 @@
     transition: all 0.3s ease;
   }
 
+
+  .register-card {
+    padding-top: 50px;
+    padding-bottom: 34px;
+  }
+  .login-card {
+    padding-top: 50px;
+    padding-bottom: 34px;
+  }
+
   .card-title {
     text-align: center;
     font-size: 1.25rem;
