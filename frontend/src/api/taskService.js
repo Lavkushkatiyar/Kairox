@@ -10,6 +10,11 @@ export async function getTasks() {
   return response.data;
 }
 
+export async function getRawInputs() {
+  const response = await apiClient.get('/inputs');
+  return response.data;
+}
+
 export async function getTaskDependencies(taskId) {
   const response = await apiClient.get(`/task/${taskId}/dependencies`);
   return response.data;

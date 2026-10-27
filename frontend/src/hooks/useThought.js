@@ -2,6 +2,9 @@ import { useState, useCallback, useRef } from 'react';
 import { mockThought } from '../data/mockData';
 import {
   createTasksFromThought,
+  getRawInputs,
+  getTasks,
+  getTasksWithDependencies,
   updateTask,
 } from '../api/taskService';
 
@@ -13,7 +16,28 @@ export function useThought() {
   const [processingMessage, setProcessingMessage] = useState('');
   const [error, setError] = useState('');
   const [tasks, setTasks] = useState([]);
+  const [allTasks, setAllTasks] = useState([]);
+  const [rawInputs, setRawInputs] = useState([]);
+  const [isLoadingAllTasks, setIsLoadingAllTasks] = useState(false);
   const isSubmitting = useRef(false);
+
+  const loadAllTasks = useCallback(async () => {
+    setIsLoadingAllTasks(true);
+    setError('');
+
+    try {
+      const [userTasks, userInputs] = await Promise.all([getTasks(), getRawInputs()]);
+      const tasksWithDependencies = await getTasksWithDependencies(userTasks);
+      setAllTasks(tasksWithDependencies);
+      setRawInputs(userInputs);
+    } catch (loadError) {
+      setError(
+        loadError.response?.data?.detail || 'Could not load tasks from your thoughts.'
+      );
+    } finally {
+      setIsLoadingAllTasks(false);
+    }
+  }, []);
 
   const handleStructure = useCallback(async () => {
     const thought = input;
@@ -61,7 +85,8 @@ export function useThought() {
 
   const updateTaskStatus = useCallback(
     async (taskId, newStatus) => {
-      const task = tasks.find((item) => item.id === taskId);
+      const task = tasks.find((item) => item.id === taskId)
+        || allTasks.find((item) => item.id === taskId);
       if (!task) return;
 
       setError('');
@@ -72,13 +97,18 @@ export function useThought() {
             item.id === taskId ? { ...item, ...updatedTask } : item
           )
         );
+        setAllTasks((previousTasks) =>
+          previousTasks.map((item) =>
+            item.id === taskId ? { ...item, ...updatedTask } : item
+          )
+        );
       } catch (updateError) {
         setError(
           updateError.response?.data?.detail || 'Could not update the task status.'
         );
       }
     },
-    [tasks]
+    [allTasks, tasks]
   );
 
   return {
@@ -90,6 +120,10 @@ export function useThought() {
     processingMessage,
     error,
     tasks,
+    allTasks,
+    rawInputs,
+    isLoadingAllTasks,
+    loadAllTasks,
     handleStructure,
     handleReset,
     handleLoadDemo,
