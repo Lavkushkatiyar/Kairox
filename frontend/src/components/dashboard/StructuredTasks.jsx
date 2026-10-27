@@ -8,7 +8,8 @@ const filters = ['all', 'todo', 'in_progress', 'critical', 'done', 'cancelled'];
 
 export function StructuredTasks({
   tasks,
-  thought,
+  rawInputs,
+  isLoading,
   onUpdateStatus,
   onCapture,
 }) {
@@ -18,6 +19,16 @@ export function StructuredTasks({
     if (filter === 'critical') return task.priority === 'critical';
     return task.status === filter;
   });
+  const taskGroups = rawInputs
+    .map((rawInput) => ({
+      id: rawInput.id,
+      thought: rawInput.text,
+      tasks: filteredTasks.filter((task) => task.input_id === rawInput.id),
+    }))
+    .filter((group) => group.tasks.length);
+  const unlinkedTasks = filteredTasks.filter(
+    (task) => !rawInputs.some((rawInput) => rawInput.id === task.input_id)
+  );
 
   return (
     <section className="relative z-10 space-y-5 pt-3">
@@ -25,7 +36,7 @@ export function StructuredTasks({
         <div>
           <h1 className="text-xl font-black text-slate-900">Structured Tasks</h1>
           <p className="mt-0.5 text-xs font-medium text-slate-500">
-            Tasks and prerequisites from your thought
+            Tasks and prerequisites from all your thoughts
           </p>
         </div>
         <div className="neu-input-inset flex items-center gap-1.5 rounded-xl p-1 text-xs">
@@ -47,9 +58,11 @@ export function StructuredTasks({
         </div>
       </div>
 
-      <SourceThought thought={thought} taskCount={tasks.length} />
-
-      {filteredTasks.length === 0 ? (
+      {isLoading ? (
+        <p className="py-8 text-center text-sm font-medium text-slate-500" role="status">
+          Loading tasks from your thoughts...
+        </p>
+      ) : filteredTasks.length === 0 ? (
         <EmptyState
           icon={<Layers size={24} className="text-sky-600" />}
           title={tasks.length ? 'No tasks match this filter' : 'No structured tasks yet'}
@@ -67,16 +80,39 @@ export function StructuredTasks({
           )}
         />
       ) : (
-        <div className="grid grid-cols-1 gap-3 xl:grid-cols-2">
-          {filteredTasks.map((task) => (
-            <TaskCard
-              key={task.id}
-              task={task}
-              allTasks={tasks}
-              taskNumber={tasks.indexOf(task) + 1}
-              onUpdateStatus={onUpdateStatus}
-            />
+        <div className="space-y-6">
+          {taskGroups.map((group) => (
+            <section key={group.id} className="space-y-3">
+              <SourceThought thought={group.thought} taskCount={group.tasks.length} />
+              <div className="grid grid-cols-1 gap-3 xl:grid-cols-2">
+                {group.tasks.map((task) => (
+                  <TaskCard
+                    key={task.id}
+                    task={task}
+                    allTasks={tasks}
+                    taskNumber={tasks.indexOf(task) + 1}
+                    onUpdateStatus={onUpdateStatus}
+                  />
+                ))}
+              </div>
+            </section>
           ))}
+          {unlinkedTasks.length > 0 && (
+            <section className="space-y-3">
+              <h2 className="text-sm font-bold text-slate-700">Other tasks</h2>
+              <div className="grid grid-cols-1 gap-3 xl:grid-cols-2">
+                {unlinkedTasks.map((task) => (
+                  <TaskCard
+                    key={task.id}
+                    task={task}
+                    allTasks={tasks}
+                    taskNumber={tasks.indexOf(task) + 1}
+                    onUpdateStatus={onUpdateStatus}
+                  />
+                ))}
+              </div>
+            </section>
+          )}
         </div>
       )}
     </section>

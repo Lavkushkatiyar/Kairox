@@ -12,7 +12,7 @@ import { PriorityBadge } from '../ui/Badge';
 import { statusConfig } from '../../data/mockData';
 
 const NODE_WIDTH = 248;
-const NODE_HEIGHT = 220;
+const NODE_HEIGHT = 208;
 const COLUMN_GAP = 310;
 const ROW_GAP = 260;
 const EDGE_GAP = NODE_WIDTH / 2 + 24;
@@ -60,23 +60,22 @@ function getTaskLayout(tasks) {
   const maxColumn = Math.max(0, ...positionedLevels.values());
   const width = Math.max(760, 300 + maxColumn * COLUMN_GAP);
   const tallestColumn = Math.max(1, ...[...columns.values()].map((items) => items.length));
-  const height = Math.max(480, 220 + (tallestColumn - 1) * ROW_GAP);
+  const rowCount = Math.max(3, tallestColumn);
+  const height = Math.max(600, NODE_HEIGHT + (rowCount - 1) * ROW_GAP + 24);
   const positions = new Map();
 
   columns.forEach((columnTasks, level) => {
     columnTasks.forEach((task, index) => {
-      const offset = (index - (columnTasks.length - 1) / 2) * ROW_GAP;
-      const baseY = height / 2;
-      const dependentParent = (task.depends_on_ids || [])
-        .map((id) => positions.get(id))
-        .find(Boolean);
-      const y = dependentParent && columnTasks.length === 1
-        ? dependentParent.y + ROW_GAP / 2
-        : baseY + offset;
+      const previousColumnBranches = (columns.get(level - 1)?.length || 0) > 1;
+      const row = columnTasks.length === 1
+        ? previousColumnBranches
+          ? 1
+          : [1, 0, 2, 0, 2, 1][level % 6]
+        : (rowCount - columnTasks.length) / 2 + index;
 
       positions.set(task.id, {
         x: EDGE_GAP + level * COLUMN_GAP,
-        y: Math.max(NODE_HEIGHT / 2 + 12, Math.min(height - NODE_HEIGHT / 2 - 12, y)),
+        y: NODE_HEIGHT / 2 + 12 + row * ROW_GAP,
       });
     });
   });
@@ -147,7 +146,7 @@ export function TaskGraph({ tasks, thought, onUpdateStatus }) {
             Your execution plan
           </h3>
           <p className="mt-1 text-xs font-medium text-slate-500">
-            Follow the sequence and see what each task depends on.
+            Explore your tasks and how they connect.
           </p>
         </div>
         <div className="flex items-center gap-3 text-[10px] font-semibold text-slate-500">
@@ -240,7 +239,7 @@ export function TaskGraph({ tasks, thought, onUpdateStatus }) {
                   width: NODE_WIDTH,
                 }}
               >
-                <div className="mb-3 flex items-start justify-between gap-2">
+                <div className="mb-3 flex items-center justify-between gap-2">
                   <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${
                     isExecuting ? 'bg-emerald-50 text-emerald-600' : 'bg-white text-sky-600'
                   } shadow-sm`}>
@@ -264,9 +263,7 @@ export function TaskGraph({ tasks, thought, onUpdateStatus }) {
                     </span>
                     {dependencies.length > 0 && (
                       <span className="text-[9px] text-slate-400">
-                        Depends on {dependencies.map((dependency) =>
-                          `#${String(tasks.indexOf(dependency) + 1).padStart(2, '0')}`
-                        ).join(', ')}
+                        Depends on #{String(tasks.indexOf(dependencies[0]) + 1).padStart(2, '0')}
                       </span>
                     )}
                   </div>
@@ -281,25 +278,23 @@ export function TaskGraph({ tasks, thought, onUpdateStatus }) {
                   </p>
                 )}
 
-                <div className="mt-3 space-y-2 border-t border-slate-200/70 pt-2.5">
-                  <div className="flex items-center gap-1.5 text-[10px] text-slate-500">
-                    <Clock3 size={11} className="shrink-0 text-sky-600" />
-                    <span>{formatDueTime(task.due_at)}</span>
+                <div className="mt-3 flex items-center justify-between gap-2 border-t border-slate-200/70 pt-2.5">
+                  <div className="min-w-0 space-y-1">
+                    <div className="flex items-center gap-1.5 text-[10px] text-slate-500">
+                      <Clock3 size={11} className="shrink-0 text-sky-600" />
+                      <span className="truncate">{formatDueTime(task.due_at)}</span>
+                    </div>
+                    <div className="flex items-center gap-1.5 text-[9px] text-slate-400">
+                      <GitBranch size={11} className="shrink-0" />
+                      <span>
+                        {dependencies.length
+                          ? `Depends on ${dependencies.map(({ title }) => title).join(', ')}`
+                          : 'No prerequisites'}
+                        {dependentCount > 0 && ` · Unlocks ${dependentCount}`}
+                      </span>
+                    </div>
                   </div>
-                  <div className="flex items-start gap-1.5 text-[10px] leading-relaxed text-slate-500">
-                    <GitBranch size={12} className="mt-0.5 shrink-0 text-slate-400" />
-                    <span className="min-w-0">
-                      {dependencies.length
-                        ? <>Depends on <span className="font-semibold text-slate-700">{dependencies.map(({ title }) => title).join(', ')}</span></>
-                        : 'No prerequisites'}
-                      {dependentCount > 0 && (
-                        <span className="block text-slate-400">
-                          Unlocks {dependentCount} {dependentCount === 1 ? 'task' : 'tasks'}
-                        </span>
-                      )}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between gap-2">
+                  <div className="flex shrink-0 flex-col items-end gap-1.5">
                     <PriorityBadge priority={task.priority} />
                     <select
                       aria-label={`Status for ${task.title}`}
