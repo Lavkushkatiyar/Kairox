@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Layout } from '../components/layout/Layout';
 import { ExecutionTimeline } from '../components/dashboard/ExecutionTimeline';
@@ -30,6 +31,10 @@ export function Dashboard({ user, onLogout }) {
     processingMessage,
     error,
     tasks,
+    allTasks,
+    rawInputs,
+    isLoadingAllTasks,
+    loadAllTasks,
     handleStructure,
     handleReset,
     handleLoadDemo,
@@ -39,6 +44,12 @@ export function Dashboard({ user, onLogout }) {
   const handleViewChange = (view) => {
     navigate(pathByView[view] || '/');
   };
+
+  useEffect(() => {
+    if (activeView === 'tasks') {
+      loadAllTasks();
+    }
+  }, [activeView, loadAllTasks]);
 
   return (
     <Layout
@@ -77,8 +88,9 @@ export function Dashboard({ user, onLogout }) {
 
         {activeView === 'tasks' && (
           <StructuredTasks
-            tasks={tasks}
-            thought={structuredThought}
+            tasks={allTasks}
+            rawInputs={rawInputs}
+            isLoading={isLoadingAllTasks}
             onUpdateStatus={updateTaskStatus}
             onCapture={() => handleViewChange('capture')}
           />

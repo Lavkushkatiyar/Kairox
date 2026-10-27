@@ -54,19 +54,21 @@ def get_input_result(
     if raw_input is None:
         raise HTTPException(status_code=404, detail="Input not found")
 
-    if raw_input.status == InputStatus.PENDING:
-        return {"status": "pending", "message": "Waiting in queue"}
-
-    if raw_input.status == InputStatus.PROCESSING:
-        return {"status": "processing", "message": "Being processed"}
-
     if raw_input.status == InputStatus.FAILED:
         return {
             "status": "failed",
             "error": raw_input.error_message,
         }
 
-    tasks = db.query(Task).filter(Task.input_id == input_id).all()
+    tasks = []
+    if raw_input.status in (InputStatus.PROCESSING, InputStatus.COMPLETED):
+        tasks = db.query(Task).filter(Task.input_id == input_id).all()
+
+    if raw_input.status == InputStatus.PENDING:
+        return {"status": "pending", "message": "Waiting in queue"}
+
+    if raw_input.status == InputStatus.PROCESSING and not tasks:
+        return {"status": "processing", "message": "Being processed"}
 
     return {
         "status": "completed",
