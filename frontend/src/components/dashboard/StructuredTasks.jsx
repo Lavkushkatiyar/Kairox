@@ -33,10 +33,12 @@ export function StructuredTasks({
     return {
       ...rawInput,
       tasks: inputTasks,
+      taskCount: inputTasks.length,
       activeTaskCount: activeInputTasks.length,
       filteredTasks: activeInputTasks.filter((task) => filteredTasks.includes(task)),
     };
-  }).filter((rawInput) => rawInput.tasks.length === 0 || rawInput.activeTaskCount > 0);
+  });
+  const allUnlinkedTasks = tasks.filter((task) => !task.input_id);
   const unlinkedTasks = filteredTasks.filter(
     (task) => !rawInputs.some((rawInput) => rawInput.id === task.input_id)
   );
@@ -146,7 +148,8 @@ export function StructuredTasks({
                   <div className="min-w-0 flex-1">
                     <SourceThought
                       thought={rawInput.text}
-                      taskCount={rawInput.activeTaskCount}
+                      taskCount={rawInput.taskCount}
+                      remainingCount={rawInput.activeTaskCount}
                       status={rawInput.status}
                       expanded={expanded}
                       onToggle={() => toggleInput(rawInput.id)}
@@ -175,9 +178,11 @@ export function StructuredTasks({
                     />
                   ) : (
                     <p className="px-4 py-2 text-xs font-medium text-slate-400">
-                      {rawInput.activeTaskCount
-                        ? 'No tasks from this thought match the selected filter.'
-                        : 'No tasks have been generated from this thought yet.'}
+                      {rawInput.activeTaskCount === 0 && rawInput.taskCount > 0
+                        ? 'All tasks from this thought are done. See the Execution Timeline for completed tasks.'
+                        : rawInput.activeTaskCount > 0
+                          ? 'No tasks from this thought match the selected filter.'
+                          : 'No tasks have been generated from this thought yet.'}
                     </p>
                   )
                 )}
@@ -188,7 +193,8 @@ export function StructuredTasks({
             <section className="space-y-3">
               <SourceThought
                 thought="Tasks without an available raw input"
-                taskCount={unlinkedTasks.length}
+                taskCount={allUnlinkedTasks.length}
+                remainingCount={allUnlinkedTasks.filter((task) => task.status !== 'done').length}
                 expanded={expandedInputIds.has('unlinked')}
                 onToggle={() => toggleInput('unlinked')}
               />

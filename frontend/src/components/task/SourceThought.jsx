@@ -3,11 +3,18 @@ import { ChevronDown, MessageSquareText } from 'lucide-react';
 export function SourceThought({
   thought,
   taskCount,
+  remainingCount,
   expanded,
   onToggle,
   status,
 }) {
   if (!thought) return null;
+  const taskSummary = taskCount === 0
+    ? '0 tasks'
+    : remainingCount === 0
+      ? `${taskCount} ${taskCount === 1 ? 'task' : 'tasks'} · All tasks done`
+      : `${taskCount} ${taskCount === 1 ? 'task' : 'tasks'} · ${remainingCount} left`;
+  const allTasksDone = taskCount > 0 && remainingCount === 0;
 
   const content = (
     <>
@@ -24,9 +31,13 @@ export function SourceThought({
           </span>
         )}
       </span>
-      <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-emerald-100 bg-white/80 px-3 py-1.5 text-[10px] font-bold text-emerald-700 shadow-sm">
+      <span className={`inline-flex shrink-0 items-center gap-1.5 rounded-full border bg-white/80 px-3 py-1.5 text-[10px] font-bold shadow-sm ${
+        allTasksDone
+          ? 'border-emerald-100 text-emerald-700'
+          : 'border-slate-200 text-slate-600'
+      }`}>
         <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-        {taskCount} {taskCount === 1 ? 'task' : 'tasks'}
+        {taskSummary}
       </span>
       <ChevronDown
         size={16}
