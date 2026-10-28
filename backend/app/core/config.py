@@ -1,4 +1,3 @@
-
 from pydantic_settings import BaseSettings
 
 
@@ -14,9 +13,7 @@ class Settings(BaseSettings):
     API_KEY: str = ""
 
     # Database
-    DATABASE_URL: str = (
-        "postgresql://postgres:password@localhost:5432/kairox"
-    )
+    DATABASE_URL: str = "postgresql://postgres:password@localhost:5432/kairox"
 
     # Authentication
     SECRET_KEY: str = "Your+secret+key"

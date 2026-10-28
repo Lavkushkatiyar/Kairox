@@ -1,7 +1,6 @@
 import asyncio
 
 import pytest
-
 from app.cache.redis_client import close_redis, init_redis
 from app.cache.utils import delete_cache, delete_cache_pattern, get_cache, set_cache
 

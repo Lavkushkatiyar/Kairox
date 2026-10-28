@@ -49,7 +49,7 @@ export function StructuredTasks({
   };
   const deleteInput = async (inputId) => {
     if (!window.confirm(
-      'Delete this thought? Its tasks will remain without their original input.'
+      'Delete this thought? Its tasks will also be deleted.'
     )) return;
 
     setDeletingInputIds((ids) => new Set(ids).add(inputId));

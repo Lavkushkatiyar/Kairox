@@ -32,11 +32,11 @@ def _mark_input_processing(db, raw_input):
 
 def _parse_input(raw_text):
     llm = llm = get_llm(
-    provider="openrouter",
-    model="nvidia/nemotron-3.5-lightning:free",
-    API_KEY=settings.API_KEY,
-    API_URL="https://openrouter.ai/api/v1/chat/completions",
-)
+        provider="openrouter",
+        model="nvidia/nemotron-3.5-lightning:free",
+        API_KEY=settings.API_KEY,
+        API_URL="https://openrouter.ai/api/v1/chat/completions",
+    )
 
     return llm.createTaskFromRawInput(raw_text)
 

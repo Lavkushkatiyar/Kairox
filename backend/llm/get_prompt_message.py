@@ -1,4 +1,3 @@
-
 SYSTEM_PROMPT = """
 You are Kairox's task interpretation assistant.
 Extract actionable work from the user's text and classify it into structured tasks.
@@ -48,7 +47,6 @@ ENUM RULES:
 - The top-level value must be an object, never a list.
 - Return JSON only. Do not include explanations or reasoning.
 """
-
 
 
 def get_prompted_message(user_message):

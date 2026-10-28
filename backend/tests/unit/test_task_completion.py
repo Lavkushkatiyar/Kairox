@@ -84,9 +84,7 @@ def test_task_with_incomplete_prerequisite_is_rejected(db_session: Session):
     user = create_user(db_session)
     prerequisite = create_task(db_session, user.id, "Collect project metrics")
     task = create_task(db_session, user.id, "Analyze project metrics")
-    db_session.add(
-        TaskDependency(task_id=task.id, depends_on_id=prerequisite.id)
-    )
+    db_session.add(TaskDependency(task_id=task.id, depends_on_id=prerequisite.id))
     db_session.commit()
 
     with pytest.raises(HTTPException) as error:
@@ -110,12 +108,8 @@ def test_multiple_prerequisites_must_all_be_completed(db_session: Session):
     task = create_task(db_session, user.id, "Prepare project report")
     db_session.add_all(
         [
-            TaskDependency(
-                task_id=task.id, depends_on_id=completed_prerequisite.id
-            ),
-            TaskDependency(
-                task_id=task.id, depends_on_id=incomplete_prerequisite.id
-            ),
+            TaskDependency(task_id=task.id, depends_on_id=completed_prerequisite.id),
+            TaskDependency(task_id=task.id, depends_on_id=incomplete_prerequisite.id),
             TaskDependency(
                 task_id=task.id, depends_on_id=second_incomplete_prerequisite.id
             ),

@@ -1,5 +1,4 @@
 import requests
-
 from app.schemas.ai_response import AI_TASK_FORMAT
 from llm.get_prompt_message import get_prompted_message
 
@@ -19,7 +18,7 @@ class AIServices:
         self.provider = provider
         self.model = model
 
-    def createTaskFromRawInput(self, message):  
+    def createTaskFromRawInput(self, message):
         print("got the message ", message)
         payload = self._build_payload(message)
 
@@ -34,8 +33,7 @@ class AIServices:
         message,
     ) -> dict:
         payload_message = get_prompted_message(message)
-        
-        
+
         return {
             "model": self.model,
             "messages": payload_message,
@@ -48,7 +46,6 @@ class AIServices:
                 "num_ctx": 8192,
             },
         }
-
 
     def _post_request(self, url: str, payload) -> dict:
         print("ai request send")
@@ -75,7 +72,6 @@ class AIServices:
         response.raise_for_status()
         return response.json()
 
-
     @staticmethod
     def _extract_content(
         result: dict,
@@ -85,20 +81,14 @@ class AIServices:
             output = result.get("message", {}).get("content")
         else:
             choices = result.get("choices", [])
-            output = (
-                choices[0].get("message", {}).get("content")
-                if choices
-                else None
-            )
+            output = choices[0].get("message", {}).get("content") if choices else None
 
         if not output:
-            raise ValueError(
-                f"LLM returned empty content from provider: {provider}"
-            )
+            raise ValueError(f"LLM returned empty content from provider: {provider}")
 
         parsed_output = AI_TASK_FORMAT.model_validate_json(output)
         return parsed_output.model_dump()
-    
+
     @staticmethod
     def _print_ollama_metrics(result: dict) -> None:
         duration_keys = (
