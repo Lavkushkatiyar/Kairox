@@ -40,6 +40,7 @@ export function Dashboard({ user, onLogout }) {
     handleLoadDemo,
     updateTaskStatus,
     updateTaskDetails,
+    removeRawInput,
     removeTask,
   } = useThought();
 
@@ -98,6 +99,7 @@ export function Dashboard({ user, onLogout }) {
             isLoading={isLoadingAllTasks}
             onUpdateStatus={updateTaskStatus}
             onUpdateTask={updateTaskDetails}
+            onDeleteInput={removeRawInput}
             onDeleteTask={removeTask}
             error={error}
             onCapture={() => handleViewChange('capture')}

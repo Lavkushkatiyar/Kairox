@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Layers } from 'lucide-react';
+import { Layers, Trash2 } from 'lucide-react';
 import { EmptyState } from '../ui/EmptyState';
 import { SourceThought } from '../task/SourceThought';
 import { TaskGraph } from '../task/TaskGraph';
@@ -12,12 +12,14 @@ export function StructuredTasks({
   isLoading,
   onUpdateStatus,
   onUpdateTask,
+  onDeleteInput,
   onDeleteTask,
   error,
   onCapture,
 }) {
   const [filter, setFilter] = useState('all');
   const [expandedInputIds, setExpandedInputIds] = useState(() => new Set());
+  const [deletingInputIds, setDeletingInputIds] = useState(() => new Set());
   const filteredTasks = tasks.filter((task) => {
     if (filter === 'all') return true;
     if (filter === 'critical') return task.priority === 'critical';
@@ -44,6 +46,29 @@ export function StructuredTasks({
       }
       return nextExpandedIds;
     });
+  };
+  const deleteInput = async (inputId) => {
+    if (!window.confirm(
+      'Delete this thought? Its tasks will remain without their original input.'
+    )) return;
+
+    setDeletingInputIds((ids) => new Set(ids).add(inputId));
+    try {
+      const deleted = await onDeleteInput(inputId);
+      if (deleted) {
+        setExpandedInputIds((ids) => {
+          const nextIds = new Set(ids);
+          nextIds.delete(inputId);
+          return nextIds;
+        });
+      }
+    } finally {
+      setDeletingInputIds((ids) => {
+        const nextIds = new Set(ids);
+        nextIds.delete(inputId);
+        return nextIds;
+      });
+    }
   };
 
   return (
@@ -101,13 +126,27 @@ export function StructuredTasks({
             const expanded = expandedInputIds.has(rawInput.id);
             return (
               <section key={rawInput.id} className="space-y-3">
-                <SourceThought
-                  thought={rawInput.text}
-                  taskCount={rawInput.tasks.length}
-                  status={rawInput.status}
-                  expanded={expanded}
-                  onToggle={() => toggleInput(rawInput.id)}
-                />
+                <div className="flex items-center gap-2">
+                  <div className="min-w-0 flex-1">
+                    <SourceThought
+                      thought={rawInput.text}
+                      taskCount={rawInput.tasks.length}
+                      status={rawInput.status}
+                      expanded={expanded}
+                      onToggle={() => toggleInput(rawInput.id)}
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    aria-label={`Delete thought: ${rawInput.text}`}
+                    title="Delete thought"
+                    disabled={deletingInputIds.has(rawInput.id)}
+                    onClick={() => deleteInput(rawInput.id)}
+                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[var(--bg-color)] text-slate-400 shadow-[4px_4px_9px_#d1d9e6,-4px_-4px_9px_#ffffff] transition hover:text-rose-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-sky-500 disabled:cursor-wait disabled:opacity-50"
+                  >
+                    <Trash2 size={15} />
+                  </button>
+                </div>
                 {expanded && (
                   rawInput.filteredTasks.length > 0 ? (
                     <TaskGraph

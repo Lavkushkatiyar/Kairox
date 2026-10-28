@@ -16,6 +16,11 @@ export async function getRawInputs() {
   return response.data;
 }
 
+export async function deleteRawInput(inputId) {
+  const response = await apiClient.delete(`/inputs/${inputId}`);
+  return response.data;
+}
+
 export async function getTaskDependencies(taskId) {
   const response = await apiClient.get(`/task/${taskId}/dependencies`);
   return response.data;
