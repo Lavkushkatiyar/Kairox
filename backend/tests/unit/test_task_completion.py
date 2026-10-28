@@ -1,3 +1,4 @@
+from datetime import UTC, datetime
 from uuid import uuid4
 
 import pytest
@@ -78,6 +79,25 @@ def test_task_without_prerequisites_can_be_completed(db_session: Session):
     updated = complete_task(db_session, user.id, task.id)
 
     assert updated.status == TaskStatus.DONE
+    assert updated.completed_at is not None
+    assert updated.completed_at <= datetime.now(UTC).replace(tzinfo=None)
+
+
+def test_reopening_task_clears_completion_timestamp(db_session: Session):
+    user = create_user(db_session)
+    task = create_task(db_session, user.id, "Independent task")
+    db_session.commit()
+    complete_task(db_session, user.id, task.id)
+
+    updated = TaskService.updated_task(
+        db_session,
+        user.id,
+        task.id,
+        TaskUpdate(title=task.title, description="", status=TaskStatus.IN_PROGRESS),
+    )
+
+    assert updated.status == TaskStatus.IN_PROGRESS
+    assert updated.completed_at is None
 
 
 def test_task_with_incomplete_prerequisite_is_rejected(db_session: Session):

@@ -4,7 +4,7 @@ import { EmptyState } from '../ui/EmptyState';
 import { SourceThought } from '../task/SourceThought';
 import { TaskGraph } from '../task/TaskGraph';
 
-const filters = ['all', 'todo', 'in_progress', 'critical', 'done', 'cancelled'];
+const filters = ['all', 'todo', 'in_progress', 'critical', 'cancelled'];
 
 export function StructuredTasks({
   tasks,
@@ -16,23 +16,27 @@ export function StructuredTasks({
   onDeleteTask,
   error,
   onCapture,
+  onViewTimeline,
 }) {
   const [filter, setFilter] = useState('all');
   const [expandedInputIds, setExpandedInputIds] = useState(() => new Set());
   const [deletingInputIds, setDeletingInputIds] = useState(() => new Set());
-  const filteredTasks = tasks.filter((task) => {
+  const activeTasks = tasks.filter((task) => task.status !== 'done');
+  const filteredTasks = activeTasks.filter((task) => {
     if (filter === 'all') return true;
     if (filter === 'critical') return task.priority === 'critical';
     return task.status === filter;
   });
   const taskGroups = rawInputs.map((rawInput) => {
     const inputTasks = tasks.filter((task) => task.input_id === rawInput.id);
+    const activeInputTasks = inputTasks.filter((task) => task.status !== 'done');
     return {
       ...rawInput,
       tasks: inputTasks,
-      filteredTasks: inputTasks.filter((task) => filteredTasks.includes(task)),
+      activeTaskCount: activeInputTasks.length,
+      filteredTasks: activeInputTasks.filter((task) => filteredTasks.includes(task)),
     };
-  });
+  }).filter((rawInput) => rawInput.tasks.length === 0 || rawInput.activeTaskCount > 0);
   const unlinkedTasks = filteredTasks.filter(
     (task) => !rawInputs.some((rawInput) => rawInput.id === task.input_id)
   );
@@ -103,14 +107,26 @@ export function StructuredTasks({
         <p className="py-8 text-center text-sm font-medium text-slate-500" role="status">
           Loading tasks from your thoughts...
         </p>
-      ) : rawInputs.length === 0 && unlinkedTasks.length === 0 ? (
+      ) : taskGroups.length === 0 && unlinkedTasks.length === 0 ? (
         <EmptyState
           icon={<Layers size={24} className="text-sky-600" />}
-          title={tasks.length ? 'No tasks match this filter' : 'No structured tasks yet'}
-          description={tasks.length
-            ? 'Choose another filter to see more tasks.'
-            : 'Capture a thought to create its task plan.'}
-          action={!tasks.length && (
+          title={tasks.length && activeTasks.length === 0
+            ? 'All tasks completed'
+            : tasks.length ? 'No tasks match this filter' : 'No structured tasks yet'}
+          description={tasks.length && activeTasks.length === 0
+            ? 'Completed tasks are available in the Execution Timeline.'
+            : tasks.length
+              ? 'Choose another filter to see more tasks.'
+              : 'Capture a thought to create its task plan.'}
+          action={tasks.length && activeTasks.length === 0 ? (
+            <button
+              type="button"
+              onClick={onViewTimeline}
+              className="neu-pill-btn px-3 py-1.5 text-xs"
+            >
+              View Execution Timeline
+            </button>
+          ) : !tasks.length && (
             <button
               type="button"
               onClick={onCapture}
@@ -130,7 +146,7 @@ export function StructuredTasks({
                   <div className="min-w-0 flex-1">
                     <SourceThought
                       thought={rawInput.text}
-                      taskCount={rawInput.tasks.length}
+                      taskCount={rawInput.activeTaskCount}
                       status={rawInput.status}
                       expanded={expanded}
                       onToggle={() => toggleInput(rawInput.id)}
@@ -159,7 +175,7 @@ export function StructuredTasks({
                     />
                   ) : (
                     <p className="px-4 py-2 text-xs font-medium text-slate-400">
-                      {rawInput.tasks.length
+                      {rawInput.activeTaskCount
                         ? 'No tasks from this thought match the selected filter.'
                         : 'No tasks have been generated from this thought yet.'}
                     </p>

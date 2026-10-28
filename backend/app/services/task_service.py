@@ -136,6 +136,10 @@ class TaskService:
         task.title = data.title
         task.description = data.description
         if data.status is not None:
+            if data.status == TaskStatus.DONE and task.status != TaskStatus.DONE:
+                task.completed_at = datetime.now(UTC).replace(tzinfo=None)
+            elif data.status != TaskStatus.DONE:
+                task.completed_at = None
             task.status = data.status
         if data.priority is not None:
             task.priority = data.priority
