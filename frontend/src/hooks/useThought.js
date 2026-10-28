@@ -3,6 +3,7 @@ import { mockThought } from '../data/mockData';
 import {
   createTasksFromThought,
   deleteTask,
+  deleteRawInput,
   getRawInputs,
   getTasks,
   getTasksWithDependencies,
@@ -119,6 +120,31 @@ export function useThought() {
     [updateTaskDetails]
   );
 
+  const removeRawInput = useCallback(
+    async (inputId) => {
+      setError('');
+      try {
+        await deleteRawInput(inputId);
+        setRawInputs((previousInputs) =>
+          previousInputs.filter((rawInput) => rawInput.id !== inputId)
+        );
+        const unlinkTasks = (previousTasks) =>
+          previousTasks.map((task) =>
+            task.input_id === inputId ? { ...task, input_id: null } : task
+          );
+        setTasks(unlinkTasks);
+        setAllTasks(unlinkTasks);
+        return true;
+      } catch (deleteError) {
+        setError(
+          deleteError.response?.data?.detail || 'Could not delete the thought.'
+        );
+        return false;
+      }
+    },
+    []
+  );
+
   const removeTask = useCallback(
     async (taskId) => {
       setError('');
@@ -159,6 +185,7 @@ export function useThought() {
     handleLoadDemo,
     updateTaskStatus,
     updateTaskDetails,
+    removeRawInput,
     removeTask,
   };
 }

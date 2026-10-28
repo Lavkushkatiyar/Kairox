@@ -1,8 +1,5 @@
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
-
 from app.api.auth_dependencies import get_current_user
 from app.db.session import get_db
 from app.models.raw_input import InputStatus
@@ -12,6 +9,8 @@ from app.schemas.raw_input import RawInputCreate, RawInputResponse
 from app.schemas.task import TaskRead
 from app.services.raw_input_service import RawInputService
 from app.workers.tasks.process_input import process_rawInput
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.orm import Session
 
 router = APIRouter(prefix="/inputs", tags=["Raw Inputs"])
 
@@ -75,3 +74,14 @@ def get_input_result(
         "tasks": [TaskRead.model_validate(task) for task in tasks],
         "processed_at": raw_input.processed_at,
     }
+
+
+@router.delete("/{input_id}")
+def delete_raw_input(
+    input_id: UUID,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    return RawInputService.delete_input(
+        db=db, input_id=input_id, user_id=current_user.id
+    )

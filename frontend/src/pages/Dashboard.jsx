@@ -40,6 +40,7 @@ export function Dashboard({ user, onLogout }) {
     handleLoadDemo,
     updateTaskStatus,
     updateTaskDetails,
+    removeRawInput,
     removeTask,
   } = useThought();
 
@@ -48,7 +49,7 @@ export function Dashboard({ user, onLogout }) {
   };
 
   useEffect(() => {
-    if (activeView === 'tasks') {
+    if (activeView === 'tasks' || activeView === 'timeline') {
       loadAllTasks();
     }
   }, [activeView, loadAllTasks]);
@@ -98,16 +99,17 @@ export function Dashboard({ user, onLogout }) {
             isLoading={isLoadingAllTasks}
             onUpdateStatus={updateTaskStatus}
             onUpdateTask={updateTaskDetails}
+            onDeleteInput={removeRawInput}
             onDeleteTask={removeTask}
             error={error}
             onCapture={() => handleViewChange('capture')}
+            onViewTimeline={() => handleViewChange('timeline')}
           />
         )}
 
         {activeView === 'timeline' && (
           <ExecutionTimeline
-            tasks={tasks}
-            thought={structuredThought}
+            tasks={allTasks}
             onUpdateStatus={updateTaskStatus}
             onCapture={() => handleViewChange('capture')}
           />

@@ -1,3 +1,4 @@
+from datetime import UTC, datetime
 from uuid import uuid4
 
 import pytest
@@ -78,15 +79,32 @@ def test_task_without_prerequisites_can_be_completed(db_session: Session):
     updated = complete_task(db_session, user.id, task.id)
 
     assert updated.status == TaskStatus.DONE
+    assert updated.completed_at is not None
+    assert updated.completed_at <= datetime.now(UTC).replace(tzinfo=None)
+
+
+def test_reopening_task_clears_completion_timestamp(db_session: Session):
+    user = create_user(db_session)
+    task = create_task(db_session, user.id, "Independent task")
+    db_session.commit()
+    complete_task(db_session, user.id, task.id)
+
+    updated = TaskService.updated_task(
+        db_session,
+        user.id,
+        task.id,
+        TaskUpdate(title=task.title, description="", status=TaskStatus.IN_PROGRESS),
+    )
+
+    assert updated.status == TaskStatus.IN_PROGRESS
+    assert updated.completed_at is None
 
 
 def test_task_with_incomplete_prerequisite_is_rejected(db_session: Session):
     user = create_user(db_session)
     prerequisite = create_task(db_session, user.id, "Collect project metrics")
     task = create_task(db_session, user.id, "Analyze project metrics")
-    db_session.add(
-        TaskDependency(task_id=task.id, depends_on_id=prerequisite.id)
-    )
+    db_session.add(TaskDependency(task_id=task.id, depends_on_id=prerequisite.id))
     db_session.commit()
 
     with pytest.raises(HTTPException) as error:
@@ -110,12 +128,8 @@ def test_multiple_prerequisites_must_all_be_completed(db_session: Session):
     task = create_task(db_session, user.id, "Prepare project report")
     db_session.add_all(
         [
-            TaskDependency(
-                task_id=task.id, depends_on_id=completed_prerequisite.id
-            ),
-            TaskDependency(
-                task_id=task.id, depends_on_id=incomplete_prerequisite.id
-            ),
+            TaskDependency(task_id=task.id, depends_on_id=completed_prerequisite.id),
+            TaskDependency(task_id=task.id, depends_on_id=incomplete_prerequisite.id),
             TaskDependency(
                 task_id=task.id, depends_on_id=second_incomplete_prerequisite.id
             ),

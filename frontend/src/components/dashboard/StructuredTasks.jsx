@@ -1,10 +1,10 @@
 import { useState } from 'react';
-import { Layers } from 'lucide-react';
+import { Layers, Trash2 } from 'lucide-react';
 import { EmptyState } from '../ui/EmptyState';
 import { SourceThought } from '../task/SourceThought';
 import { TaskGraph } from '../task/TaskGraph';
 
-const filters = ['all', 'todo', 'in_progress', 'critical', 'done', 'cancelled'];
+const filters = ['all', 'todo', 'in_progress', 'critical', 'cancelled'];
 
 export function StructuredTasks({
   tasks,
@@ -12,25 +12,33 @@ export function StructuredTasks({
   isLoading,
   onUpdateStatus,
   onUpdateTask,
+  onDeleteInput,
   onDeleteTask,
   error,
   onCapture,
+  onViewTimeline,
 }) {
   const [filter, setFilter] = useState('all');
   const [expandedInputIds, setExpandedInputIds] = useState(() => new Set());
-  const filteredTasks = tasks.filter((task) => {
+  const [deletingInputIds, setDeletingInputIds] = useState(() => new Set());
+  const activeTasks = tasks.filter((task) => task.status !== 'done');
+  const filteredTasks = activeTasks.filter((task) => {
     if (filter === 'all') return true;
     if (filter === 'critical') return task.priority === 'critical';
     return task.status === filter;
   });
   const taskGroups = rawInputs.map((rawInput) => {
     const inputTasks = tasks.filter((task) => task.input_id === rawInput.id);
+    const activeInputTasks = inputTasks.filter((task) => task.status !== 'done');
     return {
       ...rawInput,
       tasks: inputTasks,
-      filteredTasks: inputTasks.filter((task) => filteredTasks.includes(task)),
+      taskCount: inputTasks.length,
+      activeTaskCount: activeInputTasks.length,
+      filteredTasks: activeInputTasks.filter((task) => filteredTasks.includes(task)),
     };
   });
+  const allUnlinkedTasks = tasks.filter((task) => !task.input_id);
   const unlinkedTasks = filteredTasks.filter(
     (task) => !rawInputs.some((rawInput) => rawInput.id === task.input_id)
   );
@@ -44,6 +52,29 @@ export function StructuredTasks({
       }
       return nextExpandedIds;
     });
+  };
+  const deleteInput = async (inputId) => {
+    if (!window.confirm(
+      'Delete this thought? Its tasks will also be deleted.'
+    )) return;
+
+    setDeletingInputIds((ids) => new Set(ids).add(inputId));
+    try {
+      const deleted = await onDeleteInput(inputId);
+      if (deleted) {
+        setExpandedInputIds((ids) => {
+          const nextIds = new Set(ids);
+          nextIds.delete(inputId);
+          return nextIds;
+        });
+      }
+    } finally {
+      setDeletingInputIds((ids) => {
+        const nextIds = new Set(ids);
+        nextIds.delete(inputId);
+        return nextIds;
+      });
+    }
   };
 
   return (
@@ -78,14 +109,26 @@ export function StructuredTasks({
         <p className="py-8 text-center text-sm font-medium text-slate-500" role="status">
           Loading tasks from your thoughts...
         </p>
-      ) : rawInputs.length === 0 && unlinkedTasks.length === 0 ? (
+      ) : taskGroups.length === 0 && unlinkedTasks.length === 0 ? (
         <EmptyState
           icon={<Layers size={24} className="text-sky-600" />}
-          title={tasks.length ? 'No tasks match this filter' : 'No structured tasks yet'}
-          description={tasks.length
-            ? 'Choose another filter to see more tasks.'
-            : 'Capture a thought to create its task plan.'}
-          action={!tasks.length && (
+          title={tasks.length && activeTasks.length === 0
+            ? 'All tasks completed'
+            : tasks.length ? 'No tasks match this filter' : 'No structured tasks yet'}
+          description={tasks.length && activeTasks.length === 0
+            ? 'Completed tasks are available in the Execution Timeline.'
+            : tasks.length
+              ? 'Choose another filter to see more tasks.'
+              : 'Capture a thought to create its task plan.'}
+          action={tasks.length && activeTasks.length === 0 ? (
+            <button
+              type="button"
+              onClick={onViewTimeline}
+              className="neu-pill-btn px-3 py-1.5 text-xs"
+            >
+              View Execution Timeline
+            </button>
+          ) : !tasks.length && (
             <button
               type="button"
               onClick={onCapture}
@@ -101,13 +144,28 @@ export function StructuredTasks({
             const expanded = expandedInputIds.has(rawInput.id);
             return (
               <section key={rawInput.id} className="space-y-3">
-                <SourceThought
-                  thought={rawInput.text}
-                  taskCount={rawInput.tasks.length}
-                  status={rawInput.status}
-                  expanded={expanded}
-                  onToggle={() => toggleInput(rawInput.id)}
-                />
+                <div className="flex items-center gap-2">
+                  <div className="min-w-0 flex-1">
+                    <SourceThought
+                      thought={rawInput.text}
+                      taskCount={rawInput.taskCount}
+                      remainingCount={rawInput.activeTaskCount}
+                      status={rawInput.status}
+                      expanded={expanded}
+                      onToggle={() => toggleInput(rawInput.id)}
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    aria-label={`Delete thought: ${rawInput.text}`}
+                    title="Delete thought"
+                    disabled={deletingInputIds.has(rawInput.id)}
+                    onClick={() => deleteInput(rawInput.id)}
+                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[var(--bg-color)] text-slate-400 shadow-[4px_4px_9px_#d1d9e6,-4px_-4px_9px_#ffffff] transition hover:text-rose-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-sky-500 disabled:cursor-wait disabled:opacity-50"
+                  >
+                    <Trash2 size={15} />
+                  </button>
+                </div>
                 {expanded && (
                   rawInput.filteredTasks.length > 0 ? (
                     <TaskGraph
@@ -120,9 +178,11 @@ export function StructuredTasks({
                     />
                   ) : (
                     <p className="px-4 py-2 text-xs font-medium text-slate-400">
-                      {rawInput.tasks.length
-                        ? 'No tasks from this thought match the selected filter.'
-                        : 'No tasks have been generated from this thought yet.'}
+                      {rawInput.activeTaskCount === 0 && rawInput.taskCount > 0
+                        ? 'All tasks from this thought are done. See the Execution Timeline for completed tasks.'
+                        : rawInput.activeTaskCount > 0
+                          ? 'No tasks from this thought match the selected filter.'
+                          : 'No tasks have been generated from this thought yet.'}
                     </p>
                   )
                 )}
@@ -133,7 +193,8 @@ export function StructuredTasks({
             <section className="space-y-3">
               <SourceThought
                 thought="Tasks without an available raw input"
-                taskCount={unlinkedTasks.length}
+                taskCount={allUnlinkedTasks.length}
+                remainingCount={allUnlinkedTasks.filter((task) => task.status !== 'done').length}
                 expanded={expandedInputIds.has('unlinked')}
                 onToggle={() => toggleInput('unlinked')}
               />

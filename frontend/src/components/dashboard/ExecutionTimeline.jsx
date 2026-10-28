@@ -1,29 +1,31 @@
 import { Clock } from 'lucide-react';
 import { EmptyState } from '../ui/EmptyState';
-import { SourceThought } from '../task/SourceThought';
 import { TaskCard } from '../task/TaskCard';
 
 function groupTasksByDueDate(tasks) {
   const groups = new Map();
 
   tasks.forEach((task) => {
-    const dueDate = task.due_at ? new Date(task.due_at) : null;
-    const hasValidDate = dueDate && !Number.isNaN(dueDate.getTime());
+    const taskDate = task.status === 'done'
+      ? task.completed_at ? new Date(task.completed_at) : null
+      : task.due_at ? new Date(task.due_at) : null;
+    const hasValidDate = taskDate && !Number.isNaN(taskDate.getTime());
     const key = hasValidDate
-      ? `${dueDate.getFullYear()}-${dueDate.getMonth()}-${dueDate.getDate()}`
-      : 'unscheduled';
+      ? `${task.status === 'done' ? 'completed' : 'due'}-${taskDate.getFullYear()}-${taskDate.getMonth()}-${taskDate.getDate()}`
+      : task.status === 'done' ? 'completed-unscheduled' : 'unscheduled';
 
     if (!groups.has(key)) {
+      const dateLabel = hasValidDate
+        ? taskDate.toLocaleDateString([], {
+          weekday: 'long',
+          month: 'long',
+          day: 'numeric',
+        })
+        : 'Unscheduled';
       groups.set(key, {
         key,
-        label: hasValidDate
-          ? dueDate.toLocaleDateString([], {
-            weekday: 'long',
-            month: 'long',
-            day: 'numeric',
-          })
-          : 'Unscheduled',
-        sortAt: hasValidDate ? dueDate.setHours(0, 0, 0, 0) : Number.MAX_SAFE_INTEGER,
+        label: task.status === 'done' ? `Completed · ${dateLabel}` : dateLabel,
+        sortAt: hasValidDate ? taskDate.setHours(0, 0, 0, 0) : Number.MAX_SAFE_INTEGER,
         tasks: [],
       });
     }
@@ -35,8 +37,14 @@ function groupTasksByDueDate(tasks) {
     .map((group) => ({
       ...group,
       tasks: group.tasks.sort((first, second) => {
-        const firstDue = new Date(first.due_at).getTime();
-        const secondDue = new Date(second.due_at).getTime();
+        const firstDate = first.status === 'done' && first.completed_at
+          ? first.completed_at
+          : first.due_at;
+        const secondDate = second.status === 'done' && second.completed_at
+          ? second.completed_at
+          : second.due_at;
+        const firstDue = new Date(firstDate).getTime();
+        const secondDue = new Date(secondDate).getTime();
         const firstSort = Number.isNaN(firstDue) ? Number.MAX_SAFE_INTEGER : firstDue;
         const secondSort = Number.isNaN(secondDue) ? Number.MAX_SAFE_INTEGER : secondDue;
         return firstSort - secondSort;
@@ -45,7 +53,7 @@ function groupTasksByDueDate(tasks) {
     .sort((first, second) => first.sortAt - second.sortAt);
 }
 
-export function ExecutionTimeline({ tasks, thought, onUpdateStatus, onCapture }) {
+export function ExecutionTimeline({ tasks, onUpdateStatus, onCapture }) {
   const groups = groupTasksByDueDate(tasks);
 
   return (
@@ -56,8 +64,6 @@ export function ExecutionTimeline({ tasks, thought, onUpdateStatus, onCapture })
           Tasks ordered by their due dates
         </p>
       </div>
-
-      <SourceThought thought={thought} taskCount={tasks.length} />
 
       {!tasks.length ? (
         <EmptyState
