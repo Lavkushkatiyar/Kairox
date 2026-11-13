@@ -24,6 +24,7 @@ the resulting tasks in an expandable graph grouped by the original input.
 - **Persistence:** PostgreSQL, SQLAlchemy, Alembic
 - **Background jobs and cache:** Celery and Redis
 - **Task extraction:** Ollama-compatible chat API
+- **Database** : SUPABASE postgre
 - **Python tooling:** uv
 
 ## Repository layout
