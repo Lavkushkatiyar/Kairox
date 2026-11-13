@@ -219,6 +219,7 @@ start_all() {
         log "Stopping Kairox development processes..."
 
         docker stop kairox-worker >/dev/null 2>&1 || true
+        docker compose -f "$COMPOSE_FILE" stop worker
 
         for pid in "${pids[@]}"; do
             kill "$pid" 2>/dev/null || true
@@ -243,8 +244,7 @@ start_all() {
 
     log "Starting Kairox infrastructure..."
 
-    docker compose -f "$COMPOSE_FILE" up -d
-
+    docker compose -f "$COMPOSE_FILE" up -d --build
     log "Starting FastAPI..."
 
     (
@@ -253,10 +253,7 @@ start_all() {
     ) &
     pids+=("$!")
 
-    log "Starting Celery worker in Docker..."
 
-    docker_worker &
-    pids+=("$!")
 
     log "Starting React frontend..."
 
