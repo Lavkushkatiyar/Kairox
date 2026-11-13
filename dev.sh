@@ -160,72 +160,121 @@ build_frontend() {
 # Docker commands
 # -------------------------
 
+# -------------------------
+# Docker commands
+# -------------------------
+
 docker_build() {
     require_command docker
 
-    [[ -f "$ROOT_DIR/Dockerfile" ]] || error "Dockerfile does not exist yet."
+    [[ -f "$ROOT_DIR/backend/Dockerfile" ]] \
+        || error "backend/Dockerfile does not exist."
 
     log "Building Kairox worker image..."
-    docker build -t "$WORKER_IMAGE" "$ROOT_DIR"
+
+    docker build \
+        -f "$ROOT_DIR/backend/Dockerfile" \
+        -t "$WORKER_IMAGE" \
+        "$ROOT_DIR"
 }
 
 docker_worker() {
     require_command docker
 
-    [[ -f "$ROOT_DIR/Dockerfile" ]] || error "Dockerfile does not exist yet."
-    [[ -f "$BACKEND_DIR/.env" ]] || error "backend/.env not found."
+    [[ -f "$BACKEND_DIR/.env" ]] \
+        || error "backend/.env not found."
+
+    if ! docker image inspect "$WORKER_IMAGE" >/dev/null 2>&1; then
+        docker_build
+    fi
 
     log "Starting Celery worker container..."
+
     docker run --rm \
         --name kairox-worker \
         --env-file "$BACKEND_DIR/.env" \
         "$WORKER_IMAGE"
 }
 
+
+# -------------------------
+# Start all services
+# -------------------------
+
 start_all() {
     require_command uv
     require_command docker
     require_command npm
 
-    log "Starting Kairox infrastructure..."
-    docker compose -f "$COMPOSE_FILE" up -d
+    [[ -f "$BACKEND_DIR/.env" ]] \
+        || error "backend/.env not found."
 
     local -a pids=()
+    local cleanup_started=false
 
     cleanup() {
+        [[ "$cleanup_started" == true ]] && return
+        cleanup_started=true
+
         log "Stopping Kairox development processes..."
+
+        docker stop kairox-worker >/dev/null 2>&1 || true
 
         for pid in "${pids[@]}"; do
             kill "$pid" 2>/dev/null || true
         done
 
-        wait 2>/dev/null || true
+        for pid in "${pids[@]}"; do
+            wait "$pid" 2>/dev/null || true
+        done
+
         log "Kairox development processes stopped."
     }
 
-    trap cleanup EXIT INT TERM
+    trap cleanup EXIT
+    trap 'exit 130' INT
+    trap 'exit 143' TERM
+
+    log "Building Docker worker image if necessary..."
+
+    if ! docker image inspect "$WORKER_IMAGE" >/dev/null 2>&1; then
+        docker_build
+    fi
+
+    log "Starting Kairox infrastructure..."
+
+    docker compose -f "$COMPOSE_FILE" up -d
 
     log "Starting FastAPI..."
-    (cd "$BACKEND_DIR" && uv run --project .. uvicorn app.main:app --reload) &
+
+    (
+        cd "$BACKEND_DIR"
+        exec uv run --project .. uvicorn app.main:app --reload
+    ) &
     pids+=("$!")
 
-    log "Starting Celery worker..."
-    (cd "$BACKEND_DIR" && uv run --project .. celery \
-        -A app.workers.celery_app:celery_app worker --loglevel=INFO) &
+    log "Starting Celery worker in Docker..."
+
+    docker_worker &
     pids+=("$!")
 
     log "Starting React frontend..."
-    (cd "$FRONTEND_DIR" && npm run dev) &
+
+    (
+        cd "$FRONTEND_DIR"
+        exec npm run dev
+    ) &
     pids+=("$!")
 
     log "Kairox development environment started."
     log "API:      http://localhost:8000"
     log "API Docs: http://localhost:8000/docs"
     log "Frontend: Vite development URL"
+    log "Worker:   Docker container kairox-worker"
+    log "Press Ctrl+C to stop."
 
     wait
 }
-
 
 # -------------------------
 # CLI
